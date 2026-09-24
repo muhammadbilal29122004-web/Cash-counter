@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Smart Cash Counter & Denomination Calculator</title>
-  <meta name="description" content="Modern, fast and accurate Cash Counter and Denomination Breakdown Calculator with Cash Difference, History and Slip Printing.">
+  <title>Smart Cash Counter & Khata Ledger</title>
+  <meta name="description" content="Professional Multi-Currency Cash Counter, Cash In/Cash Out Khata Ledger, Denomination Breakdown, and Excel Export.">
   
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -25,33 +25,46 @@
     <header class="app-header">
       <div class="header-brand">
         <div class="logo-icon">
-          <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect x="2" y="6" width="20" height="12" rx="2"></rect>
             <circle cx="12" cy="12" r="2"></circle>
             <path d="M6 12h.01M18 12h.01"></path>
           </svg>
         </div>
         <div>
-          <h1>Smart Cash Counter</h1>
-          <p class="subtitle">Daily Cash Tally & Denomination Breakdown</p>
+          <h1>Smart Cash Counter & Khata</h1>
+          <p class="subtitle">Multi-Currency Denomination Counter & Daily Cash Ledger</p>
         </div>
       </div>
       
       <div class="header-actions">
-        <!-- Currency Badge -->
-        <div class="currency-pill">
-          <span class="currency-flag">🇵🇰</span>
-          <span class="currency-name">PKR (Rs)</span>
+        <!-- Currency Selector Dropdown -->
+        <div class="select-wrapper">
+          <label for="currencySelect" class="sr-only">Currency</label>
+          <select id="currencySelect" class="currency-select" title="Change Currency">
+            <option value="PKR" selected>🇵🇰 PKR (₨)</option>
+            <option value="USD">🇺🇸 USD ($)</option>
+            <option value="INR">🇮🇳 INR (₹)</option>
+            <option value="AED">🇦🇪 AED (د.إ)</option>
+            <option value="SAR">🇸🇦 SAR (﷼)</option>
+          </select>
+        </div>
+
+        <!-- Theme Switcher -->
+        <div class="theme-selector" title="Switch Theme">
+          <button class="theme-btn active" data-theme="dark" title="Dark Slate">🌙</button>
+          <button class="theme-btn" data-theme="light" title="Clean Light">☀️</button>
+          <button class="theme-btn" data-theme="luxury" title="Luxury Gold">👑</button>
         </div>
 
         <!-- Sound Toggle -->
         <button id="soundToggle" class="icon-btn" title="Toggle Sound Feedback">
-          <svg id="soundOnIcon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+          <svg id="soundOnIcon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
             <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
             <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
             <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
           </svg>
-          <svg id="soundOffIcon" class="hidden" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+          <svg id="soundOffIcon" class="hidden" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
             <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
             <line x1="23" y1="9" x2="17" y2="15"></line>
             <line x1="17" y1="9" x2="23" y2="15"></line>
@@ -71,6 +84,17 @@
         <span>Denomination Counter</span>
       </button>
 
+      <button class="tab-btn" data-tab="khata-tab" id="btnTabKhata">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+        <span>Cash In/Out (Khata)</span>
+      </button>
+
       <button class="tab-btn" data-tab="breakdown-tab" id="btnTabBreakdown">
         <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="12" cy="12" r="10"></circle>
@@ -85,7 +109,7 @@
           <path d="M12 8v4l3 3"></path>
           <circle cx="12" cy="12" r="9"></circle>
         </svg>
-        <span>History Logs (<span id="historyBadge">0</span>)</span>
+        <span>Saved Logs (<span id="historyBadge">0</span>)</span>
       </button>
     </nav>
 
@@ -101,7 +125,7 @@
             <div class="card-header">
               <div class="card-title-group">
                 <span class="card-icon">💵</span>
-                <h2>Count Physical Cash</h2>
+                <h2>Count Physical Notes</h2>
               </div>
               <div class="quick-header-actions">
                 <button class="text-btn" id="btnResetTally" title="Clear all counts">
@@ -114,9 +138,9 @@
               </div>
             </div>
 
-            <!-- Notes Table / List -->
+            <!-- Dynamic Notes List -->
             <div class="denomination-list" id="denominationList">
-              <!-- Rendered dynamically by JS -->
+              <!-- Injected by JS based on currency -->
             </div>
           </div>
 
@@ -126,14 +150,14 @@
             <div class="glass-card grand-total-card">
               <span class="total-label">Total Cash Counted</span>
               <div class="total-display">
-                <span class="currency-symbol">Rs.</span>
+                <span class="currency-symbol" id="mainCurrencySymbol">Rs.</span>
                 <span id="grandTotalAmount" class="total-num">0</span>
               </div>
 
               <!-- Amount in Words -->
               <div class="amount-in-words-box">
                 <span class="words-title">In Words:</span>
-                <p id="amountInWords" class="words-text">Zero Rupees Only</p>
+                <p id="amountInWords" class="words-text">Zero Only</p>
               </div>
 
               <!-- Stat Chips -->
@@ -143,7 +167,7 @@
                   <span id="totalNotesCount" class="stat-chip-val">0 pcs</span>
                 </div>
                 <div class="stat-chip">
-                  <span class="stat-chip-label">High Value (≥500)</span>
+                  <span class="stat-chip-label">High Notes (≥500)</span>
                   <span id="highValPercent" class="stat-chip-val">0%</span>
                 </div>
               </div>
@@ -152,27 +176,27 @@
             <!-- Cash Balancing / Difference Checker -->
             <div class="glass-card balance-card">
               <div class="balance-header">
-                <h3>Closing / Cash Difference</h3>
-                <span class="badge" id="balanceStatusBadge">Balanced</span>
+                <h3>Cash Register Reconciliation</h3>
+                <span class="badge" id="balanceStatusBadge">Counting</span>
               </div>
-              <p class="section-desc">Enter expected register amount to verify short/excess:</p>
+              <p class="section-desc">Enter expected closing cash to calculate short / excess:</p>
               
               <div class="input-with-symbol">
-                <span class="symbol-affix">Rs.</span>
-                <input type="number" id="expectedAmountInput" placeholder="Expected amount (e.g. 50,000)" min="0">
+                <span class="symbol-affix" id="diffCurrencySymbol">Rs.</span>
+                <input type="number" id="expectedAmountInput" placeholder="Expected cash in hand" min="0">
               </div>
 
               <div id="differenceResultBox" class="diff-result-box hidden">
                 <div class="diff-row">
                   <span class="diff-title" id="diffTitle">Difference:</span>
-                  <span class="diff-val" id="diffValue">Rs. 0</span>
+                  <span class="diff-val" id="diffValue">0</span>
                 </div>
               </div>
             </div>
 
             <!-- Action Tools -->
             <div class="glass-card actions-card">
-              <h3>Receipt & Actions</h3>
+              <h3>Receipt & Quick Actions</h3>
               <div class="action-buttons-grid">
                 <button class="action-btn primary" id="btnSaveRecord">
                   <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
@@ -212,7 +236,137 @@
         </div>
       </section>
 
-      <!-- ==================== TAB 2: AMOUNT BREAKDOWN ==================== -->
+      <!-- ==================== TAB 2: CASH IN / CASH OUT (KHATA) ==================== -->
+      <section id="khata-tab" class="tab-pane">
+        <div class="khata-container">
+          
+          <!-- Khata Overview Stats -->
+          <div class="khata-stats-grid">
+            <div class="glass-card stat-card in-card">
+              <div class="stat-card-header">
+                <span class="stat-label">Total Cash In (آمدنی)</span>
+                <span class="stat-icon-badge in-bg">🟢 +</span>
+              </div>
+              <div class="stat-val" id="khataTotalIn">Rs. 0</div>
+            </div>
+
+            <div class="glass-card stat-card out-card">
+              <div class="stat-card-header">
+                <span class="stat-label">Total Cash Out (خرچ)</span>
+                <span class="stat-icon-badge out-bg">🔴 −</span>
+              </div>
+              <div class="stat-val" id="khataTotalOut">Rs. 0</div>
+            </div>
+
+            <div class="glass-card stat-card net-card">
+              <div class="stat-card-header">
+                <span class="stat-label">Net Cash Balance (خالص رقم)</span>
+                <span class="stat-icon-badge net-bg">💼 =</span>
+              </div>
+              <div class="stat-val" id="khataNetBalance">Rs. 0</div>
+            </div>
+          </div>
+
+          <div class="grid-layout khata-layout">
+            <!-- Add Transaction Form -->
+            <div class="glass-card khata-form-card">
+              <div class="card-header">
+                <div class="card-title-group">
+                  <span class="card-icon">📝</span>
+                  <h2>New Entry (اندراج کریں)</h2>
+                </div>
+              </div>
+
+              <form id="khataForm" class="khata-form" onsubmit="handleKhataSubmit(event)">
+                <!-- Entry Type Selector -->
+                <div class="type-toggle-group">
+                  <button type="button" class="type-toggle-btn active-in" id="typeBtnIn" onclick="setKhataType('IN')">
+                    🟢 Cash IN (آمدنی)
+                  </button>
+                  <button type="button" class="type-toggle-btn" id="typeBtnOut" onclick="setKhataType('OUT')">
+                    🔴 Cash OUT (خرچ)
+                  </button>
+                </div>
+
+                <div class="form-group">
+                  <label for="khataAmount">Amount (<span class="khata-curr-label">Rs</span>)</label>
+                  <input type="number" id="khataAmount" placeholder="Enter amount" min="1" step="any" required>
+                </div>
+
+                <div class="form-group">
+                  <label for="khataParty">Party / Customer / Person Name</label>
+                  <input type="text" id="khataParty" placeholder="e.g. Ali Ahmed, Ali Store, Self" required>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="khataCategory">Category</label>
+                    <select id="khataCategory">
+                      <option value="Sale / Payment">Sale / Daily Sale</option>
+                      <option value="Customer Khata">Customer Payment</option>
+                      <option value="Supplier / Goods">Supplier / Stock Purchase</option>
+                      <option value="Expense / Bill">Electricity / Utility Bill</option>
+                      <option value="Salary / Wages">Staff Salary / Daily Wages</option>
+                      <option value="Food & Tea">Food & Tea / Refreshment</option>
+                      <option value="Rent">Shop / Office Rent</option>
+                      <option value="Other">Other Miscellaneous</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="khataMode">Payment Mode</label>
+                    <select id="khataMode">
+                      <option value="Cash">Cash (نقد)</option>
+                      <option value="Bank Transfer">Bank Transfer / Raast</option>
+                      <option value="EasyPaisa / JazzCash">EasyPaisa / JazzCash</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="khataRemark">Note / Details (Optional)</label>
+                  <input type="text" id="khataRemark" placeholder="Optional details or invoice #">
+                </div>
+
+                <button type="submit" class="action-btn primary w-full" id="btnSubmitKhata">
+                  ➕ Save Khata Entry
+                </button>
+              </form>
+            </div>
+
+            <!-- Transactions List & Excel Export -->
+            <div class="glass-card khata-list-card">
+              <div class="card-header">
+                <div class="card-title-group">
+                  <span class="card-icon">📋</span>
+                  <h2>Daily Ledger Entries</h2>
+                </div>
+                <div class="khata-tools">
+                  <button class="action-btn excel-btn" id="btnExportExcel" onclick="exportKhataToCSV()">
+                    📊 Export Excel (CSV)
+                  </button>
+                  <button class="text-btn" id="btnClearKhata" onclick="clearAllKhata()">
+                    Clear All
+                  </button>
+                </div>
+              </div>
+
+              <!-- Filter Tabs -->
+              <div class="filter-chips">
+                <button class="filter-chip active" onclick="filterKhata('ALL', this)">All Entries (<span id="countAll">0</span>)</button>
+                <button class="filter-chip" onclick="filterKhata('IN', this)">🟢 Cash IN (<span id="countIn">0</span>)</button>
+                <button class="filter-chip" onclick="filterKhata('OUT', this)">🔴 Cash OUT (<span id="countOut">0</span>)</button>
+              </div>
+
+              <div id="khataEntriesList" class="khata-entries-scroll">
+                <!-- Injected by JS -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== TAB 3: AMOUNT BREAKDOWN ==================== -->
       <section id="breakdown-tab" class="tab-pane">
         <div class="breakdown-container glass-card">
           <div class="breakdown-header">
@@ -226,7 +380,7 @@
             <div class="breakdown-input-wrapper">
               <label for="breakdownInput">Enter Total Amount</label>
               <div class="input-with-symbol big-input">
-                <span class="symbol-affix">Rs.</span>
+                <span class="symbol-affix" id="breakdownCurrencySymbol">Rs.</span>
                 <input 
                   type="number" 
                   id="breakdownInput" 
@@ -279,7 +433,7 @@
         </div>
       </section>
 
-      <!-- ==================== TAB 3: HISTORY LOGS ==================== -->
+      <!-- ==================== TAB 4: HISTORY LOGS ==================== -->
       <section id="history-tab" class="tab-pane">
         <div class="glass-card history-container">
           <div class="history-header">
@@ -315,7 +469,7 @@
   <!-- Toast Notification Container -->
   <div id="toast" class="toast hidden"></div>
 
-  <!-- Printable Receipt Modal / Section (Hidden on screen, active when printed) -->
+  <!-- Printable Receipt Modal / Section -->
   <div id="printableSlip" class="printable-slip">
     <div class="slip-header">
       <h2>CASH COUNT SLIP</h2>
