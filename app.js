@@ -1,68 +1,115 @@
 /**
- * Smart Cash Counter & Khata Ledger
+ * Bilal Cash Desk™ Pro - Enterprise Financial Application Logic
+ * Author: Muhammad Bilal
  * Features:
- * - Multi-Currency Denomination Counter (PKR, USD, INR, AED, SAR)
- * - Multi-Theme Support (Dark Slate, Clean Light, Luxury Emerald-Gold)
- * - Cash In / Cash Out (Khata / Daily Income & Expense Ledger)
- * - Excel / CSV Ledger Export
- * - Cash Breakdown Solver & Difference Reconciliation
- * - Web Audio API Synthesizer & Receipt Printing
+ * - Multi-Currency Denomination Engine (PKR, USD, INR, AED, SAR, GBP, EUR)
+ * - Bilingual UI (English / اردو)
+ * - Pieces vs Bundles/Gaddi (100 notes) calculation modes
+ * - Real-Time POS Cash In / Out (Khata) Ledger with Excel CSV Export
+ * - Speech Synthesis Voice Announcer & Web Audio Synthesizer
+ * - Register Closing Reconciliation (Difference & Status)
+ * - Thermal POS Slip Printing & WhatsApp Sharing
  */
 
-// Supported Currencies Configuration
+// Supported Currencies Registry
 const CURRENCIES = {
-  PKR: {
-    name: 'Pakistani Rupee',
-    symbol: 'Rs.',
-    denominations: [5000, 1000, 500, 100, 50, 20, 10, 5, 2, 1],
-    wordFormat: 'indian'
+  PKR: { name: 'Pakistani Rupee', symbol: 'Rs.', denominations: [5000, 1000, 500, 100, 50, 20, 10, 5, 2, 1], wordSystem: 'indian' },
+  USD: { name: 'US Dollar', symbol: '$', denominations: [100, 50, 20, 10, 5, 2, 1], wordSystem: 'standard' },
+  INR: { name: 'Indian Rupee', symbol: '₹', denominations: [500, 200, 100, 50, 20, 10, 5, 2, 1], wordSystem: 'indian' },
+  AED: { name: 'UAE Dirham', symbol: 'د.إ', denominations: [1000, 500, 200, 100, 50, 20, 10, 5], wordSystem: 'standard' },
+  SAR: { name: 'Saudi Riyal', symbol: '﷼', denominations: [500, 200, 100, 50, 20, 10, 5, 1], wordSystem: 'standard' },
+  GBP: { name: 'British Pound', symbol: '£', denominations: [50, 20, 10, 5, 2, 1], wordSystem: 'standard' },
+  EUR: { name: 'Euro', symbol: '€', denominations: [500, 200, 100, 50, 20, 10, 5, 2, 1], wordSystem: 'standard' }
+};
+
+// Bilingual Dictionary
+const I18N = {
+  en: {
+    tab_counter: 'Denomination Counter',
+    tab_khata: 'Cash In/Out (Khata)',
+    tab_breakdown: 'Dispense / Breakdown',
+    tab_history: 'Closing History',
+    desk_title: 'Physical Cash Counter',
+    desk_subtitle: 'Enter pieces or bundles of banknotes to tally',
+    col_note: 'Banknote',
+    col_count: 'Quantity / Pcs',
+    col_bundles: 'Quick Add',
+    col_subtotal: 'Subtotal',
+    reset: 'Reset',
+    total_counted: 'TOTAL COUNTED CASH',
+    in_words: 'AMOUNT IN WORDS:',
+    total_pieces: 'Total Banknotes',
+    gaddis_count: 'Full Bundles (100s)',
+    high_val: 'High Notes (≥500)',
+    avg_note: 'Avg. Value / Note',
+    reconciliation_title: 'Register Closing & Balancing',
+    reconciliation_desc: 'Compare physical cash with opening / POS expected',
+    expected_cash: 'Expected POS Amount',
+    receipt_actions: 'Shift Actions & Reports',
+    save_log: 'Save Shift Record',
+    copy_summary: 'Copy Text',
+    print_slip: 'Print Receipt',
+    khata_in: 'Total Cash IN (آمدنی)',
+    khata_out: 'Total Cash OUT (خرچ)',
+    khata_net: 'Net Cash in Drawer (خالص رقم)',
+    new_entry_title: 'New Khata Transaction',
+    new_entry_sub: 'Record sales, payments, purchases or expenses',
+    ledger_title: 'Daily Cash Register Log'
   },
-  USD: {
-    name: 'US Dollar',
-    symbol: '$',
-    denominations: [100, 50, 20, 10, 5, 2, 1],
-    wordFormat: 'standard'
-  },
-  INR: {
-    name: 'Indian Rupee',
-    symbol: '₹',
-    denominations: [500, 200, 100, 50, 20, 10, 5, 2, 1],
-    wordFormat: 'indian'
-  },
-  AED: {
-    name: 'UAE Dirham',
-    symbol: 'د.إ',
-    denominations: [1000, 500, 200, 100, 50, 20, 10, 5],
-    wordFormat: 'standard'
-  },
-  SAR: {
-    name: 'Saudi Riyal',
-    symbol: '﷼',
-    denominations: [500, 200, 100, 50, 20, 10, 5, 1],
-    wordFormat: 'standard'
+  ur: {
+    tab_counter: 'نوٹوں کی گنتی (کاؤنٹر)',
+    tab_khata: 'آمدنی اور خرچ (کھاتہ)',
+    tab_breakdown: 'رقم کی تقسیم',
+    tab_history: 'ریکارڈ لاگ',
+    desk_title: 'پیسوں اور نوٹوں کی گنتی',
+    desk_subtitle: 'کل رقم کا حساب کتاب لگانے کے لیے نوٹوں کی تعداد درج کریں',
+    col_note: 'نوٹ',
+    col_count: 'تعداد (پیس)',
+    col_bundles: 'گڈی / بنڈل',
+    col_subtotal: 'میزان',
+    reset: 'صفر کریں',
+    total_counted: 'کل گنی ہوئی رقم',
+    in_words: 'رقم الفاظ میں:',
+    total_pieces: 'کل نوٹ',
+    gaddis_count: 'کل گڈیاں (100 والے)',
+    high_val: 'بڑے نوٹ (≥500)',
+    avg_note: 'اوسط فی نوٹ',
+    reconciliation_title: 'کیش رجسٹر بیلنسنگ',
+    reconciliation_desc: 'متوقع رقم سے کیش کا موازنہ کریں',
+    expected_cash: 'متوقع مطلوبہ رقم',
+    receipt_actions: 'رسید اور ایکشنز',
+    save_log: 'ریکارڈ محفوظ کریں',
+    copy_summary: 'خلاصہ کاپی کریں',
+    print_slip: 'رسید پرنٹ کریں',
+    khata_in: 'کل آمدنی (Cash IN)',
+    khata_out: 'کل خرچ (Cash OUT)',
+    khata_net: 'خالص کیش بیلنس',
+    new_entry_title: 'نیا کھاتہ اندراج',
+    new_entry_sub: 'سیل، کسٹمر ریکوری، یا خرچہ درج کریں',
+    ledger_title: 'روزنامچہ کیش لاگ'
   }
 };
 
+// Global App State
+let currentLang = 'en';
 let currentCurrency = 'PKR';
 let currentTheme = 'dark';
+let countMode = 'pieces'; // 'pieces' or 'bundles'
 let countState = {};
 let soundEnabled = true;
+let voiceEnabled = false;
 let historyLogs = [];
 let khataEntries = [];
 let currentKhataType = 'IN';
 let khataFilter = 'ALL';
 
-// Web Audio API Sound Synthesizer
+// Audio Synthesizer
 let audioCtx = null;
 function playBeep(type = 'click') {
   if (!soundEnabled) return;
   try {
-    if (!audioCtx) {
-      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    }
-    if (audioCtx.state === 'suspended') {
-      audioCtx.resume();
-    }
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
     osc.connect(gain);
@@ -70,11 +117,11 @@ function playBeep(type = 'click') {
 
     if (type === 'click') {
       osc.type = 'sine';
-      osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+      osc.frequency.setValueAtTime(650, audioCtx.currentTime);
       gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.04);
       osc.start();
-      osc.stop(audioCtx.currentTime + 0.05);
+      osc.stop(audioCtx.currentTime + 0.04);
     } else if (type === 'success') {
       osc.type = 'triangle';
       osc.frequency.setValueAtTime(523.25, audioCtx.currentTime);
@@ -84,21 +131,19 @@ function playBeep(type = 'click') {
       osc.start();
       osc.stop(audioCtx.currentTime + 0.25);
     }
-  } catch (e) {
-    // Audio context error or blocked
-  }
+  } catch (e) {}
 }
 
-// Utility: Format Number
+// Utility: Number formatting
 function formatNumber(num) {
   if (isNaN(num) || num === null || num === undefined) return '0';
   return Number(num).toLocaleString('en-US');
 }
 
-// Number to Words Converter (Supports Indian Lakhs/Crores and Standard Millions)
-function numberToWords(num, format = 'indian') {
+// Number to Words Converter
+function numberToWords(num, system = 'indian') {
   if (num === 0) return 'Zero Only';
-  if (num < 0) return 'Negative ' + numberToWords(Math.abs(num), format);
+  if (num < 0) return 'Negative ' + numberToWords(Math.abs(num), system);
 
   const units = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten',
     'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
@@ -114,14 +159,12 @@ function numberToWords(num, format = 'indian') {
       str += tens[Math.floor(n / 10)] + ' ';
       n %= 10;
     }
-    if (n > 0) {
-      str += units[n] + ' ';
-    }
+    if (n > 0) str += units[n] + ' ';
     return str.trim();
   }
 
   let words = '';
-  if (format === 'indian') {
+  if (system === 'indian') {
     const crore = Math.floor(num / 10000000);
     num %= 10000000;
     const lakh = Math.floor(num / 100000);
@@ -150,41 +193,90 @@ function numberToWords(num, format = 'indian') {
   return words.trim() + ` ${curr.name}s Only`;
 }
 
-// ==================== THEMES & CURRENCY ====================
+// Voice Announcer
+function speakCurrentTotal() {
+  if (!('speechSynthesis' in window)) {
+    showToast('Speech synthesis not supported in this browser');
+    return;
+  }
+  const curr = CURRENCIES[currentCurrency];
+  let grandTotal = 0;
+  curr.denominations.forEach(d => { grandTotal += (countState[d] || 0) * d; });
+  
+  const text = `Total cash counted is ${grandTotal} ${curr.name}s.`;
+  window.speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.rate = 1.0;
+  window.speechSynthesis.speak(utterance);
+}
+
+// Live Digital Clock
+function startClock() {
+  const clockEl = document.getElementById('liveClock');
+  if (!clockEl) return;
+  function update() {
+    clockEl.innerText = new Date().toLocaleTimeString('en-US', { hour12: false });
+  }
+  update();
+  setInterval(update, 1000);
+}
+
+// Language Toggle
+function toggleLanguage() {
+  currentLang = currentLang === 'en' ? 'ur' : 'en';
+  document.getElementById('langLabel').innerText = currentLang === 'en' ? 'English' : 'اردو';
+  
+  const dict = I18N[currentLang];
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.dataset.i18n;
+    if (dict[key]) el.innerText = dict[key];
+  });
+
+  document.body.style.fontFamily = currentLang === 'ur' ? 'var(--font-urdu)' : 'var(--font-sans)';
+  showToast(`Language switched to ${currentLang === 'en' ? 'English' : 'اردو'}`);
+}
+
+// Theme Switcher
 function setTheme(theme) {
   currentTheme = theme;
   document.documentElement.setAttribute('data-theme', theme);
-  localStorage.setItem('cash_counter_theme', theme);
+  localStorage.setItem('bilal_cash_theme', theme);
 
-  document.querySelectorAll('.theme-btn').forEach(btn => {
+  document.querySelectorAll('.theme-option-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.theme === theme);
   });
 }
 
+// Currency Switcher
 function setCurrency(currCode) {
   if (!CURRENCIES[currCode]) return;
   currentCurrency = currCode;
-  localStorage.setItem('cash_counter_currency', currCode);
+  localStorage.setItem('bilal_cash_currency', currCode);
 
   const curr = CURRENCIES[currCode];
-  
-  // Update currency symbols across the page
-  document.getElementById('mainCurrencySymbol').innerText = curr.symbol;
-  document.getElementById('diffCurrencySymbol').innerText = curr.symbol;
-  document.getElementById('breakdownCurrencySymbol').innerText = curr.symbol;
-  document.querySelectorAll('.khata-curr-label').forEach(el => el.innerText = curr.symbol);
+  document.getElementById('masterCurrencyLabel').innerText = curr.symbol;
+  document.getElementById('reconcileCurrPrefix').innerText = curr.symbol;
+  document.getElementById('breakdownCurrSymbol').innerText = curr.symbol;
+  document.querySelectorAll('.khata-curr-symbol').forEach(el => el.innerText = curr.symbol);
 
-  // Reset and rebuild denomination list
   countState = {};
   curr.denominations.forEach(d => { countState[d] = 0; });
-  initDenominationList();
-  calculateTotals();
-  showToast(`Currency changed to ${curr.name} (${curr.symbol})`);
+  initDenominationDesk();
+  calculateDeskTotals();
+  showToast(`Currency: ${curr.name} (${curr.symbol})`);
 }
 
-// ==================== DENOMINATION COUNTER ====================
-function initDenominationList() {
-  const container = document.getElementById('denominationList');
+// Count Mode (Pieces vs Bundles)
+function setCountMode(mode) {
+  countMode = mode;
+  document.getElementById('btnModePieces').classList.toggle('active', mode === 'pieces');
+  document.getElementById('btnModeBundles').classList.toggle('active', mode === 'bundles');
+  initDenominationDesk();
+}
+
+// ==================== DENOMINATION DESK ====================
+function initDenominationDesk() {
+  const container = document.getElementById('denominationDeskList');
   if (!container) return;
 
   const curr = CURRENCIES[currentCurrency];
@@ -192,74 +284,108 @@ function initDenominationList() {
 
   curr.denominations.forEach(denom => {
     const row = document.createElement('div');
-    row.className = 'denom-row';
+    row.className = 'note-desk-row';
     row.dataset.denom = denom;
 
-    const badgeClass = currentCurrency === 'PKR' && denom >= 10 
-      ? `denom-badge-pkr-${denom}` 
-      : 'denom-badge-default';
+    const badgeColorClass = currentCurrency === 'PKR' && denom >= 10 
+      ? `badge-denom-${denom}` 
+      : 'badge-denom-default';
+
+    const currentCount = countState[denom] || 0;
+    const displayValue = countMode === 'bundles' ? (currentCount / 100 || '') : (currentCount || '');
+    const placeholder = countMode === 'bundles' ? '0 pkt' : '0 pcs';
+
+    const quickChipsHtml = countMode === 'bundles' ? `
+      <button class="bundle-chip" onclick="addBundleStep(${denom}, 1)">+1 Gaddi</button>
+      <button class="bundle-chip" onclick="addBundleStep(${denom}, 5)">+5 Gaddi</button>
+      <button class="bundle-chip" onclick="addBundleStep(${denom}, 10)">+10</button>
+    ` : `
+      <button class="bundle-chip" onclick="addPieceStep(${denom}, 10)">+10</button>
+      <button class="bundle-chip" onclick="addPieceStep(${denom}, 50)">+50</button>
+      <button class="bundle-chip" onclick="addPieceStep(${denom}, 100)">+100</button>
+    `;
 
     row.innerHTML = `
-      <div class="denom-badge ${badgeClass}">
+      <div class="banknote-badge ${badgeColorClass}">
         <span>${curr.symbol}</span>
         <span>${denom}</span>
       </div>
 
-      <div class="denom-stepper">
-        <button class="step-btn" onclick="updateDenomCount(${denom}, -1)">−</button>
+      <div class="stepper-box">
+        <button class="stepper-btn" onclick="modifyDenomStepper(${denom}, -1)">−</button>
         <input 
           type="number" 
-          class="denom-input" 
-          id="input-denom-${denom}" 
-          value="${countState[denom] || ''}" 
-          placeholder="0" 
+          class="stepper-input" 
+          id="input-desk-${denom}" 
+          value="${displayValue}" 
+          placeholder="${placeholder}" 
           min="0"
-          oninput="handleManualInput(${denom}, this.value)"
+          oninput="handleManualDeskInput(${denom}, this.value)"
         >
-        <button class="step-btn" onclick="updateDenomCount(${denom}, 1)">+</button>
+        <button class="stepper-btn" onclick="modifyDenomStepper(${denom}, 1)">+</button>
       </div>
 
-      <div class="denom-chips">
-        <button class="chip-btn" onclick="addBundle(${denom}, 10)">+10</button>
-        <button class="chip-btn" onclick="addBundle(${denom}, 50)">+50</button>
-        <button class="chip-btn" onclick="addBundle(${denom}, 100)">+100</button>
+      <div class="bundle-chips-row">
+        ${quickChipsHtml}
       </div>
 
-      <div class="denom-subtotal" id="subtotal-${denom}">
-        <span class="currency-prefix">${curr.symbol}</span>0
+      <div class="row-subtotal-val" id="row-subtotal-${denom}">
+        ${curr.symbol} 0
       </div>
     `;
 
     container.appendChild(row);
   });
+
+  calculateDeskTotals();
 }
 
-function updateDenomCount(denom, delta) {
+function modifyDenomStepper(denom, delta) {
+  const stepUnit = countMode === 'bundles' ? 100 : 1;
   const current = countState[denom] || 0;
-  const updated = Math.max(0, current + delta);
+  const updated = Math.max(0, current + (delta * stepUnit));
   countState[denom] = updated;
 
-  const inputEl = document.getElementById(`input-denom-${denom}`);
+  const inputEl = document.getElementById(`input-desk-${denom}`);
   if (inputEl) {
-    inputEl.value = updated === 0 ? '' : updated;
+    const val = countMode === 'bundles' ? updated / 100 : updated;
+    inputEl.value = val === 0 ? '' : val;
   }
 
   playBeep('click');
-  calculateTotals();
+  calculateDeskTotals();
 }
 
-function addBundle(denom, bundleSize) {
-  updateDenomCount(denom, bundleSize);
-}
-
-function handleManualInput(denom, val) {
-  const parsed = parseInt(val, 10);
-  countState[denom] = isNaN(parsed) || parsed < 0 ? 0 : parsed;
+function addPieceStep(denom, pcs) {
+  const current = countState[denom] || 0;
+  countState[denom] = current + pcs;
+  const inputEl = document.getElementById(`input-desk-${denom}`);
+  if (inputEl) inputEl.value = countState[denom];
   playBeep('click');
-  calculateTotals();
+  calculateDeskTotals();
 }
 
-function calculateTotals() {
+function addBundleStep(denom, gaddis) {
+  const current = countState[denom] || 0;
+  countState[denom] = current + (gaddis * 100);
+  const inputEl = document.getElementById(`input-desk-${denom}`);
+  if (inputEl) inputEl.value = countState[denom] / 100;
+  playBeep('click');
+  calculateDeskTotals();
+}
+
+function handleManualDeskInput(denom, val) {
+  const parsed = parseFloat(val);
+  if (isNaN(parsed) || parsed < 0) {
+    countState[denom] = 0;
+  } else {
+    countState[denom] = countMode === 'bundles' ? Math.round(parsed * 100) : Math.round(parsed);
+  }
+  playBeep('click');
+  calculateDeskTotals();
+}
+
+function calculateDeskTotals() {
   const curr = CURRENCIES[currentCurrency];
   let grandTotal = 0;
   let totalNotes = 0;
@@ -271,188 +397,173 @@ function calculateTotals() {
     grandTotal += subtotal;
     totalNotes += count;
 
-    if (denom >= 500) {
-      highValTotal += subtotal;
-    }
+    if (denom >= 500) highValTotal += subtotal;
 
-    const subtotalEl = document.getElementById(`subtotal-${denom}`);
-    if (subtotalEl) {
-      subtotalEl.innerHTML = `<span class="currency-prefix">${curr.symbol} </span>${formatNumber(subtotal)}`;
+    const subEl = document.getElementById(`row-subtotal-${denom}`);
+    if (subEl) {
+      subEl.innerText = `${curr.symbol} ${formatNumber(subtotal)}`;
     }
   });
 
-  const grandTotalEl = document.getElementById('grandTotalAmount');
-  const totalNotesEl = document.getElementById('totalNotesCount');
-  const amountInWordsEl = document.getElementById('amountInWords');
-  const highValEl = document.getElementById('highValPercent');
+  document.getElementById('masterGrandTotal').innerText = formatNumber(grandTotal);
+  document.getElementById('masterWordsDisplay').innerText = numberToWords(grandTotal, curr.wordSystem);
+  document.getElementById('metricTotalNotes').innerText = `${formatNumber(totalNotes)} pcs`;
+  document.getElementById('metricTotalGaddis').innerText = `${(totalNotes / 100).toFixed(1)} pkt`;
+  
+  const highPercent = grandTotal > 0 ? Math.round((highValTotal / grandTotal) * 100) : 0;
+  document.getElementById('metricHighVal').innerText = `${highPercent}%`;
+  
+  const avgNoteVal = totalNotes > 0 ? Math.round(grandTotal / totalNotes) : 0;
+  document.getElementById('metricAvgNote').innerText = `${curr.symbol} ${formatNumber(avgNoteVal)}`;
 
-  if (grandTotalEl) grandTotalEl.innerText = formatNumber(grandTotal);
-  if (totalNotesEl) totalNotesEl.innerText = `${formatNumber(totalNotes)} pcs`;
-  if (amountInWordsEl) amountInWordsEl.innerText = numberToWords(grandTotal, curr.wordFormat);
-
-  if (highValEl) {
-    const percent = grandTotal > 0 ? Math.round((highValTotal / grandTotal) * 100) : 0;
-    highValEl.innerText = `${percent}%`;
-  }
-
-  checkDifference(grandTotal);
+  checkReconciliation(grandTotal);
 }
 
-function checkDifference(currentTotal) {
+function checkReconciliation(currentTotal) {
   const curr = CURRENCIES[currentCurrency];
-  const expectedInput = document.getElementById('expectedAmountInput');
-  const diffBox = document.getElementById('differenceResultBox');
-  const diffTitle = document.getElementById('diffTitle');
-  const diffValue = document.getElementById('diffValue');
-  const badge = document.getElementById('balanceStatusBadge');
+  const expectedInput = document.getElementById('expectedCashInput');
+  const container = document.getElementById('reconcileDiffContainer');
+  const badge = document.getElementById('reconcileBadge');
+  const statusLabel = document.getElementById('diffStatusLabel');
+  const amountVal = document.getElementById('diffAmountValue');
+  const explanation = document.getElementById('diffExplanationText');
 
-  if (!expectedInput || !diffBox) return;
+  if (!expectedInput || !container) return;
 
   const expectedVal = parseFloat(expectedInput.value);
 
   if (isNaN(expectedVal) || expectedInput.value.trim() === '') {
-    diffBox.classList.add('hidden');
+    container.classList.add('hidden');
     if (badge) {
-      badge.className = 'badge badge-balanced';
-      badge.innerText = 'Counting';
+      badge.className = 'status-badge badge-neutral';
+      badge.innerText = 'COUNTING';
     }
     return;
   }
 
-  diffBox.classList.remove('hidden');
+  container.classList.remove('hidden');
   const diff = currentTotal - expectedVal;
 
   if (diff === 0) {
-    badge.className = 'badge badge-balanced';
-    badge.innerText = 'Balanced ✓';
-    diffTitle.innerText = 'Status:';
-    diffValue.innerText = `Exact Match (${curr.symbol} 0)`;
-    diffBox.className = 'diff-result-box';
-    diffValue.className = 'diff-val matched';
+    badge.className = 'status-badge badge-match';
+    badge.innerText = 'PERFECT MATCH ✓';
+    statusLabel.innerText = 'Closing Status:';
+    statusLabel.style.color = '#34d399';
+    amountVal.innerText = `Exact Match (${curr.symbol} 0)`;
+    amountVal.style.color = '#34d399';
+    explanation.innerText = 'Cash in drawer perfectly matches POS closing records.';
   } else if (diff < 0) {
-    badge.className = 'badge badge-short';
-    badge.innerText = 'Shortage ✕';
-    diffTitle.innerText = 'Short Amount:';
-    diffValue.innerText = `- ${curr.symbol} ${formatNumber(Math.abs(diff))}`;
-    diffBox.className = 'diff-result-box';
-    diffValue.className = 'diff-val short';
+    badge.className = 'status-badge badge-short';
+    badge.innerText = 'SHORTAGE ✕';
+    statusLabel.innerText = 'Short Amount:';
+    statusLabel.style.color = '#f87171';
+    amountVal.innerText = `- ${curr.symbol} ${formatNumber(Math.abs(diff))}`;
+    amountVal.style.color = '#f87171';
+    explanation.innerText = `Physical cash is less than expected. Verify outstanding customer slips or unrecorded expenses.`;
   } else {
-    badge.className = 'badge badge-excess';
-    badge.innerText = 'Excess +';
-    diffTitle.innerText = 'Excess Amount:';
-    diffValue.innerText = `+ ${curr.symbol} ${formatNumber(diff)}`;
-    diffBox.className = 'diff-result-box';
-    diffValue.className = 'diff-val excess';
+    badge.className = 'status-badge badge-excess';
+    badge.innerText = 'EXCESS +';
+    statusLabel.innerText = 'Excess Amount:';
+    statusLabel.style.color = '#fbbf24';
+    amountVal.innerText = `+ ${curr.symbol} ${formatNumber(diff)}`;
+    amountVal.style.color = '#fbbf24';
+    explanation.innerText = `Physical cash exceeds POS expected balance. Check for unbilled sales.`;
   }
 }
 
-function resetCounter() {
+function resetDeskCounter() {
   const curr = CURRENCIES[currentCurrency];
   curr.denominations.forEach(d => {
     countState[d] = 0;
-    const inputEl = document.getElementById(`input-denom-${d}`);
+    const inputEl = document.getElementById(`input-desk-${d}`);
     if (inputEl) inputEl.value = '';
   });
 
-  const expectedInput = document.getElementById('expectedAmountInput');
+  const expectedInput = document.getElementById('expectedCashInput');
   if (expectedInput) expectedInput.value = '';
 
-  calculateTotals();
-  showToast('Counter has been reset');
+  calculateDeskTotals();
+  showToast('Counter reset to zero');
 }
 
-// ==================== KHATA / LEDGER (CASH IN & CASH OUT) ====================
-const KHATA_STORAGE_KEY = 'smart_cash_counter_khata';
+// ==================== KHATA / LEDGER SYSTEM ====================
+const KHATA_KEY = 'bilal_cash_khata_records';
 
 function setKhataType(type) {
   currentKhataType = type;
-  const inBtn = document.getElementById('typeBtnIn');
-  const outBtn = document.getElementById('typeBtnOut');
-
-  if (type === 'IN') {
-    inBtn.className = 'type-toggle-btn active-in';
-    outBtn.className = 'type-toggle-btn';
-  } else {
-    inBtn.className = 'type-toggle-btn';
-    outBtn.className = 'type-toggle-btn active-out';
-  }
+  document.getElementById('typeInBtn').classList.toggle('active-in', type === 'IN');
+  document.getElementById('typeOutBtn').classList.toggle('active-out', type === 'OUT');
 }
 
 function handleKhataSubmit(e) {
   e.preventDefault();
-  const amountInput = document.getElementById('khataAmount');
-  const partyInput = document.getElementById('khataParty');
-  const categorySelect = document.getElementById('khataCategory');
-  const modeSelect = document.getElementById('khataMode');
-  const remarkInput = document.getElementById('khataRemark');
+  const amountEl = document.getElementById('khataAmountInput');
+  const partyEl = document.getElementById('khataPartyInput');
+  const catEl = document.getElementById('khataCategorySelect');
+  const modeEl = document.getElementById('khataPaymentMode');
+  const notesEl = document.getElementById('khataNotesInput');
 
-  const amount = parseFloat(amountInput.value);
-  const party = partyInput.value.trim();
+  const amount = parseFloat(amountEl.value);
+  const party = partyEl.value.trim();
 
   if (isNaN(amount) || amount <= 0 || !party) {
-    showToast('Please enter valid amount & party name');
+    showToast('Please enter valid amount and party name');
     return;
   }
 
-  const entry = {
+  const newEntry = {
     id: Date.now(),
-    type: currentKhataType, // 'IN' or 'OUT'
+    type: currentKhataType,
     amount: amount,
     party: party,
-    category: categorySelect.value,
-    mode: modeSelect.value,
-    remark: remarkInput.value.trim(),
+    category: catEl.value,
+    mode: modeEl.value,
+    remarks: notesEl.value.trim(),
     currency: currentCurrency,
-    timestamp: new Date().toLocaleString('en-US', {
-      dateStyle: 'medium',
-      timeStyle: 'short'
-    }),
-    rawDate: new Date().toISOString()
+    timestamp: new Date().toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })
   };
 
-  khataEntries.unshift(entry);
-  localStorage.setItem(KHATA_STORAGE_KEY, JSON.stringify(khataEntries));
+  khataEntries.unshift(newEntry);
+  localStorage.setItem(KHATA_KEY, JSON.stringify(khataEntries));
 
-  // Reset form
-  amountInput.value = '';
-  partyInput.value = '';
-  remarkInput.value = '';
+  amountEl.value = '';
+  partyEl.value = '';
+  notesEl.value = '';
 
-  renderKhata();
+  renderKhataWorkspace();
   playBeep('success');
-  showToast(`Khata entry added (Cash ${currentKhataType})`);
+  showToast(`Khata entry saved (Cash ${currentKhataType})`);
 }
 
-function loadKhata() {
+function loadKhataRecords() {
   try {
-    const saved = localStorage.getItem(KHATA_STORAGE_KEY);
+    const saved = localStorage.getItem(KHATA_KEY);
     khataEntries = saved ? JSON.parse(saved) : [];
   } catch (e) {
     khataEntries = [];
   }
-  renderKhata();
+  renderKhataWorkspace();
 }
 
 function filterKhata(type, btnEl) {
   khataFilter = type;
-  document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.filter-pill').forEach(b => b.classList.remove('active'));
   if (btnEl) btnEl.classList.add('active');
-  renderKhata();
+  renderKhataWorkspace();
 }
 
-function renderKhata() {
-  const listEl = document.getElementById('khataEntriesList');
-  const totalInEl = document.getElementById('khataTotalIn');
-  const totalOutEl = document.getElementById('khataTotalOut');
-  const netBalanceEl = document.getElementById('khataNetBalance');
-  const countAllEl = document.getElementById('countAll');
-  const countInEl = document.getElementById('countIn');
-  const countOutEl = document.getElementById('countOut');
+function renderKhataWorkspace() {
+  const listEl = document.getElementById('khataEntriesScroll');
+  const inEl = document.getElementById('kpiTotalIn');
+  const outEl = document.getElementById('kpiTotalOut');
+  const netEl = document.getElementById('kpiNetBalance');
+  const inCountEl = document.getElementById('kpiInEntriesCount');
+  const outCountEl = document.getElementById('kpiOutEntriesCount');
+  const badgeAll = document.getElementById('badgeFilterAll');
+  const badgeIn = document.getElementById('badgeFilterIn');
+  const badgeOut = document.getElementById('badgeFilterOut');
 
-  let totalIn = 0;
-  let totalOut = 0;
-  let inCount = 0;
-  let outCount = 0;
+  let totalIn = 0, totalOut = 0, inCount = 0, outCount = 0;
 
   khataEntries.forEach(entry => {
     if (entry.type === 'IN') {
@@ -464,19 +575,18 @@ function renderKhata() {
     }
   });
 
-  const netBalance = totalIn - totalOut;
+  const net = totalIn - totalOut;
   const curr = CURRENCIES[currentCurrency];
 
-  if (totalInEl) totalInEl.innerText = `${curr.symbol} ${formatNumber(totalIn)}`;
-  if (totalOutEl) totalOutEl.innerText = `${curr.symbol} ${formatNumber(totalOut)}`;
-  if (netBalanceEl) {
-    netBalanceEl.innerText = `${curr.symbol} ${formatNumber(netBalance)}`;
-    netBalanceEl.style.color = netBalance >= 0 ? 'var(--primary)' : 'var(--accent-red)';
-  }
+  if (inEl) inEl.innerText = `${curr.symbol} ${formatNumber(totalIn)}`;
+  if (outEl) outEl.innerText = `${curr.symbol} ${formatNumber(totalOut)}`;
+  if (netEl) netEl.innerText = `${curr.symbol} ${formatNumber(net)}`;
+  if (inCountEl) inCountEl.innerText = `${inCount} Inflow Transactions`;
+  if (outCountEl) outCountEl.innerText = `${outCount} Outflow Transactions`;
 
-  if (countAllEl) countAllEl.innerText = khataEntries.length;
-  if (countInEl) countInEl.innerText = inCount;
-  if (countOutEl) countOutEl.innerText = outCount;
+  if (badgeAll) badgeAll.innerText = khataEntries.length;
+  if (badgeIn) badgeIn.innerText = inCount;
+  if (badgeOut) badgeOut.innerText = outCount;
 
   if (!listEl) return;
 
@@ -487,56 +597,55 @@ function renderKhata() {
 
   if (filtered.length === 0) {
     listEl.innerHTML = `
-      <div class="history-empty-state">
-        <p>No transactions recorded for this filter. Add new entries above.</p>
+      <div class="history-empty-msg">
+        <p>No transactions recorded for this filter.</p>
       </div>
     `;
     return;
   }
 
   listEl.innerHTML = '';
-  filtered.forEach(item => {
-    const itemEl = document.createElement('div');
-    itemEl.className = `khata-item type-${item.type.toLowerCase()}`;
-    const sign = item.type === 'IN' ? '+' : '−';
+  filtered.forEach(entry => {
+    const card = document.createElement('div');
+    card.className = `khata-entry-card ${entry.type === 'IN' ? 'in-type' : 'out-type'}`;
+    const sign = entry.type === 'IN' ? '+' : '−';
 
-    itemEl.innerHTML = `
-      <div class="khata-item-left">
-        <div class="khata-party-name">${item.party}</div>
-        <div class="khata-meta-line">
-          <span>📅 ${item.timestamp}</span> &bull; 
-          <span class="khata-tag">${item.category}</span> &bull;
-          <span class="khata-tag">${item.mode}</span>
-          ${item.remark ? `&bull; <i>${item.remark}</i>` : ''}
+    card.innerHTML = `
+      <div class="entry-left-block">
+        <div class="entry-party">${entry.party}</div>
+        <div class="entry-details-line">
+          <span>📅 ${entry.timestamp}</span> &bull; 
+          <span class="entry-cat-badge">${entry.category}</span> &bull; 
+          <span>${entry.mode}</span>
+          ${entry.remarks ? `&bull; <i>${entry.remarks}</i>` : ''}
         </div>
       </div>
-      <div class="khata-item-right">
-        <div class="khata-item-amount">${sign} ${curr.symbol} ${formatNumber(item.amount)}</div>
-        <button class="khata-del-btn" onclick="deleteKhataItem(${item.id})">Delete ✕</button>
+      <div class="entry-amount-block">
+        <span class="entry-amount-num">${sign} ${curr.symbol} ${formatNumber(entry.amount)}</span>
+        <button class="btn-delete-entry" onclick="deleteKhataEntry(${entry.id})">Delete ✕</button>
       </div>
     `;
-    listEl.appendChild(itemEl);
+    listEl.appendChild(card);
   });
 }
 
-function deleteKhataItem(id) {
+function deleteKhataEntry(id) {
   khataEntries = khataEntries.filter(x => x.id !== id);
-  localStorage.setItem(KHATA_STORAGE_KEY, JSON.stringify(khataEntries));
-  renderKhata();
-  showToast('Entry deleted');
+  localStorage.setItem(KHATA_KEY, JSON.stringify(khataEntries));
+  renderKhataWorkspace();
+  showToast('Entry removed from ledger');
 }
 
 function clearAllKhata() {
   if (khataEntries.length === 0) return;
-  if (confirm('Are you sure you want to clear all Khata entries?')) {
+  if (confirm('Are you sure you want to clear all Khata ledger records?')) {
     khataEntries = [];
-    localStorage.removeItem(KHATA_STORAGE_KEY);
-    renderKhata();
-    showToast('Khata ledger cleared');
+    localStorage.removeItem(KHATA_KEY);
+    renderKhataWorkspace();
+    showToast('All Khata entries cleared');
   }
 }
 
-// Export Khata to CSV (Compatible with Microsoft Excel & Google Sheets)
 function exportKhataToCSV() {
   if (khataEntries.length === 0) {
     showToast('No entries to export!');
@@ -544,156 +653,142 @@ function exportKhataToCSV() {
   }
 
   const curr = CURRENCIES[currentCurrency];
-  let csvContent = '\uFEFF'; // UTF-8 BOM for Urdu/Arabic support in Excel
-  csvContent += 'Transaction ID,Date & Time,Type,Party/Name,Category,Payment Mode,Amount (' + curr.symbol + '),Remarks\r\n';
+  let csv = '\uFEFF'; // UTF-8 BOM
+  csv += `Transaction ID,Timestamp,Type,Party Name,Category,Payment Method,Amount (${curr.symbol}),Remarks\r\n`;
 
   khataEntries.forEach(item => {
-    const cleanRemark = (item.remark || '').replace(/"/g, '""');
-    const cleanParty = item.party.replace(/"/g, '""');
     const row = [
       item.id,
       `"${item.timestamp}"`,
       item.type === 'IN' ? 'Cash IN' : 'Cash OUT',
-      `"${cleanParty}"`,
+      `"${item.party.replace(/"/g, '""')}"`,
       `"${item.category}"`,
       `"${item.mode}"`,
       item.amount,
-      `"${cleanRemark}"`
+      `"${(item.remarks || '').replace(/"/g, '""')}"`
     ];
-    csvContent += row.join(',') + '\r\n';
+    csv += row.join(',') + '\r\n';
   });
 
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  const dateStr = new Date().toISOString().split('T')[0];
-  link.setAttribute('href', url);
-  link.setAttribute('download', `Khata_Ledger_${dateStr}.csv`);
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `Bilal_Cash_Desk_Khata_${new Date().toISOString().split('T')[0]}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
 
   playBeep('success');
-  showToast('✓ Khata Ledger exported to CSV/Excel!');
+  showToast('Excel/CSV exported successfully!');
 }
 
-// ==================== AMOUNT BREAKDOWN SOLVER ====================
+// ==================== BREAKDOWN / DISPENSER SOLVER ====================
 function computeAmountBreakdown() {
-  const inputEl = document.getElementById('breakdownInput');
+  const inputEl = document.getElementById('breakdownTargetInput');
   if (!inputEl) return;
 
   let amount = parseInt(inputEl.value, 10);
   if (isNaN(amount) || amount <= 0) {
-    showToast('Please enter a valid amount');
+    showToast('Enter a valid payout amount');
     return;
   }
 
   const curr = CURRENCIES[currentCurrency];
   const initialAmount = amount;
-  let totalNotesNeeded = 0;
-  const breakdownResults = [];
+  let totalNotes = 0;
+  const tiles = [];
 
   for (let denom of curr.denominations) {
     let count = Math.floor(amount / denom);
     if (count > 0) {
-      breakdownResults.push({
-        denom: denom,
-        count: count,
-        total: count * denom
-      });
-      totalNotesNeeded += count;
-      amount = amount % denom;
+      tiles.push({ denom, count, total: count * denom });
+      totalNotes += count;
+      amount %= denom;
     }
   }
 
-  renderBreakdownResults(initialAmount, totalNotesNeeded, amount, breakdownResults);
+  const resultWrap = document.getElementById('breakdownResultWrap');
+  const targetDisplay = document.getElementById('bkTargetAmount');
+  const notesDisplay = document.getElementById('bkTotalNotes');
+  const remainderDisplay = document.getElementById('bkRemainder');
+  const grid = document.getElementById('breakdownTilesDesk');
+
+  resultWrap.classList.remove('hidden');
+  targetDisplay.innerText = `${curr.symbol} ${formatNumber(initialAmount)}`;
+  notesDisplay.innerText = `${formatNumber(totalNotes)} Banknotes`;
+  remainderDisplay.innerText = `${curr.symbol} ${formatNumber(amount)}`;
+
+  grid.innerHTML = '';
+  tiles.forEach(t => {
+    const div = document.createElement('div');
+    div.className = 'dispense-tile';
+    div.innerHTML = `
+      <div class="dispense-top">
+        <span class="dispense-denom" style="color: var(--brand-primary)">${curr.symbol} ${t.denom}</span>
+        <span class="dispense-count">× ${formatNumber(t.count)}</span>
+      </div>
+      <div class="dispense-val">= ${curr.symbol} ${formatNumber(t.total)}</div>
+    `;
+    grid.appendChild(div);
+  });
+
   playBeep('success');
 }
 
 function setBreakdownAmount(val) {
-  const inputEl = document.getElementById('breakdownInput');
-  if (inputEl) {
-    inputEl.value = val;
+  const input = document.getElementById('breakdownTargetInput');
+  if (input) {
+    input.value = val;
     computeAmountBreakdown();
   }
 }
 
-function renderBreakdownResults(targetAmount, totalNotes, remainder, list) {
-  const curr = CURRENCIES[currentCurrency];
-  const section = document.getElementById('breakdownResultsSection');
-  const targetDisplay = document.getElementById('targetAmountDisplay');
-  const notesDisplay = document.getElementById('targetNotesCountDisplay');
-  const remainderDisplay = document.getElementById('targetRemainderDisplay');
-  const grid = document.getElementById('breakdownCardsGrid');
-
-  if (!section || !grid) return;
-
-  section.classList.remove('hidden');
-  targetDisplay.innerText = `${curr.symbol} ${formatNumber(targetAmount)}`;
-  notesDisplay.innerText = `${formatNumber(totalNotes)} Notes`;
-  remainderDisplay.innerText = `${curr.symbol} ${formatNumber(remainder)}`;
-
-  grid.innerHTML = '';
-  list.forEach(item => {
-    const tile = document.createElement('div');
-    tile.className = 'breakdown-tile';
-    tile.innerHTML = `
-      <div class="tile-top">
-        <span class="tile-denom" style="color: var(--primary)">${curr.symbol} ${item.denom}</span>
-        <span class="tile-count">× ${formatNumber(item.count)}</span>
-      </div>
-      <div class="tile-amount">= ${curr.symbol} ${formatNumber(item.total)}</div>
-    `;
-    grid.appendChild(tile);
-  });
-}
-
 function applyBreakdownToCounter() {
-  const curr = CURRENCIES[currentCurrency];
-  const inputEl = document.getElementById('breakdownInput');
-  let amount = parseInt(inputEl.value, 10);
+  const input = document.getElementById('breakdownTargetInput');
+  let amount = parseInt(input.value, 10);
   if (isNaN(amount) || amount <= 0) return;
 
-  resetCounter();
+  resetDeskCounter();
+  const curr = CURRENCIES[currentCurrency];
 
   for (let denom of curr.denominations) {
     let count = Math.floor(amount / denom);
     if (count > 0) {
       countState[denom] = count;
-      const input = document.getElementById(`input-denom-${denom}`);
-      if (input) input.value = count;
-      amount = amount % denom;
+      const inputEl = document.getElementById(`input-desk-${denom}`);
+      if (inputEl) inputEl.value = count;
+      amount %= denom;
     }
   }
 
-  calculateTotals();
-  switchTab('tally-tab');
-  showToast('Breakdown transferred to Counter!');
+  calculateDeskTotals();
+  switchMasterTab('counter-view');
+  showToast('Breakdown transferred to physical counter!');
 }
 
-// ==================== HISTORY LOGS ====================
-const STORAGE_KEY = 'smart_cash_counter_history';
+// ==================== SHIFT CLOSING LOGS ====================
+const HISTORY_KEY = 'bilal_cash_history_records';
 
-function loadHistory() {
+function loadHistoryRecords() {
   try {
-    const saved = localStorage.getItem(STORAGE_KEY);
+    const saved = localStorage.getItem(HISTORY_KEY);
     historyLogs = saved ? JSON.parse(saved) : [];
   } catch (e) {
     historyLogs = [];
   }
-  renderHistory();
+  renderHistoryRecords();
 }
 
-function saveCurrentToHistory() {
+function saveCurrentShiftLog() {
   const curr = CURRENCIES[currentCurrency];
-  let grandTotal = 0;
-  let totalNotes = 0;
-  let breakdownSnap = {};
+  let grandTotal = 0, totalNotes = 0;
+  let snap = {};
 
   curr.denominations.forEach(d => {
     const count = countState[d] || 0;
     if (count > 0) {
-      breakdownSnap[d] = count;
+      snap[d] = count;
       grandTotal += count * d;
       totalNotes += count;
     }
@@ -704,39 +799,39 @@ function saveCurrentToHistory() {
     return;
   }
 
+  const exp = parseFloat(document.getElementById('expectedCashInput')?.value) || 0;
+
   const record = {
     id: Date.now(),
     currency: currentCurrency,
-    timestamp: new Date().toLocaleString('en-US', {
-      dateStyle: 'medium',
-      timeStyle: 'short'
-    }),
+    timestamp: new Date().toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }),
     totalAmount: grandTotal,
     totalNotes: totalNotes,
-    breakdown: breakdownSnap,
-    words: numberToWords(grandTotal, curr.wordFormat)
+    expectedAmount: exp,
+    breakdown: snap,
+    words: numberToWords(grandTotal, curr.wordSystem)
   };
 
   historyLogs.unshift(record);
   if (historyLogs.length > 50) historyLogs.pop();
 
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(historyLogs));
-  renderHistory();
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(historyLogs));
+  renderHistoryRecords();
   playBeep('success');
-  showToast('Cash Count saved to History!');
+  showToast('Shift cash closing saved to log!');
 }
 
-function renderHistory() {
-  const listEl = document.getElementById('historyList');
-  const badgeEl = document.getElementById('historyBadge');
+function renderHistoryRecords() {
+  const listEl = document.getElementById('historyRecordsList');
+  const badgeEl = document.getElementById('historyBadgeCount');
   if (!listEl) return;
 
   if (badgeEl) badgeEl.innerText = historyLogs.length;
 
   if (historyLogs.length === 0) {
     listEl.innerHTML = `
-      <div class="history-empty-state">
-        <p>No saved cash logs yet. Count cash and click "Save to Log" to track records.</p>
+      <div class="history-empty-msg">
+        <p>No shift records saved yet. Count cash and click "Save Shift Record".</p>
       </div>
     `;
     return;
@@ -745,7 +840,7 @@ function renderHistory() {
   listEl.innerHTML = '';
   historyLogs.forEach(item => {
     const card = document.createElement('div');
-    card.className = 'history-item';
+    card.className = 'history-audit-card';
     const cSymbol = CURRENCIES[item.currency]?.symbol || 'Rs.';
 
     const notesSummary = Object.entries(item.breakdown)
@@ -753,21 +848,21 @@ function renderHistory() {
       .join(', ');
 
     card.innerHTML = `
-      <div class="history-meta">
-        <span class="history-time">📅 ${item.timestamp} (${item.currency})</span>
-        <div class="history-amount">${cSymbol} ${formatNumber(item.totalAmount)}</div>
-        <div class="history-notes-summary">${notesSummary || 'No notes'} (${item.totalNotes} notes)</div>
+      <div class="history-left-info">
+        <span class="history-timestamp">📅 ${item.timestamp} &bull; <strong>${item.currency}</strong></span>
+        <div class="history-total-num">${cSymbol} ${formatNumber(item.totalAmount)}</div>
+        <div class="history-notes-desc">${notesSummary || '0 notes'} (${item.totalNotes} notes total)</div>
       </div>
-      <div class="history-actions">
-        <button class="action-btn secondary" onclick="restoreHistoryItem(${item.id})">Load</button>
-        <button class="action-btn danger-sm" onclick="deleteHistoryItem(${item.id})">Delete</button>
+      <div class="history-btn-actions">
+        <button class="desk-action-btn secondary-btn" onclick="restoreHistoryLog(${item.id})">Load</button>
+        <button class="danger-btn-text" onclick="deleteHistoryLog(${item.id})">Delete</button>
       </div>
     `;
     listEl.appendChild(card);
   });
 }
 
-function restoreHistoryItem(id) {
+function restoreHistoryLog(id) {
   const item = historyLogs.find(x => x.id === id);
   if (!item) return;
 
@@ -776,46 +871,51 @@ function restoreHistoryItem(id) {
     setCurrency(item.currency);
   }
 
-  resetCounter();
+  resetDeskCounter();
   Object.entries(item.breakdown).forEach(([denom, count]) => {
     const d = parseInt(denom, 10);
     countState[d] = count;
-    const input = document.getElementById(`input-denom-${d}`);
+    const input = document.getElementById(`input-desk-${d}`);
     if (input) input.value = count;
   });
 
-  calculateTotals();
-  switchTab('tally-tab');
-  showToast('Loaded cash record into counter!');
+  if (item.expectedAmount > 0) {
+    const expInput = document.getElementById('expectedCashInput');
+    if (expInput) expInput.value = item.expectedAmount;
+  }
+
+  calculateDeskTotals();
+  switchMasterTab('counter-view');
+  showToast('Shift record loaded into counter!');
 }
 
-function deleteHistoryItem(id) {
+function deleteHistoryLog(id) {
   historyLogs = historyLogs.filter(x => x.id !== id);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(historyLogs));
-  renderHistory();
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(historyLogs));
+  renderHistoryRecords();
   showToast('Record deleted');
 }
 
 function clearAllHistory() {
   if (historyLogs.length === 0) return;
-  if (confirm('Are you sure you want to clear all history records?')) {
+  if (confirm('Are you sure you want to clear all archived shift records?')) {
     historyLogs = [];
-    localStorage.removeItem(STORAGE_KEY);
-    renderHistory();
-    showToast('All history cleared');
+    localStorage.removeItem(HISTORY_KEY);
+    renderHistoryRecords();
+    showToast('All shift logs deleted');
   }
 }
 
-// ==================== SHARE, COPY & PRINT ====================
-function getSlipSummaryText() {
+// ==================== SLIP GENERATION & PRINTING ====================
+function getSlipTextSummary() {
   const curr = CURRENCIES[currentCurrency];
-  let grandTotal = 0;
-  let totalNotes = 0;
+  let grandTotal = 0, totalNotes = 0;
   let lines = [];
 
-  lines.push(`💵 *CASH COUNT REPORT (${currentCurrency})* 💵`);
-  lines.push(`📅 Date: ${new Date().toLocaleString()}`);
-  lines.push('────────────────────────');
+  lines.push(`💵 *BILAL CASH DESK™ PRO REPORT* 💵`);
+  lines.push(`📅 Timestamp: ${new Date().toLocaleString()}`);
+  lines.push(`👤 Cashier: Muhammad Bilal | Terminal: POS-01`);
+  lines.push('──────────────────────────────');
 
   curr.denominations.forEach(denom => {
     const count = countState[denom] || 0;
@@ -827,52 +927,50 @@ function getSlipSummaryText() {
     }
   });
 
-  lines.push('────────────────────────');
-  lines.push(`*TOTAL AMOUNT:* ${curr.symbol} ${formatNumber(grandTotal)}`);
-  lines.push(`*Total Notes:* ${formatNumber(totalNotes)} pcs`);
-  lines.push(`*In Words:* ${numberToWords(grandTotal, curr.wordFormat)}`);
-  lines.push('────────────────────────');
+  lines.push('──────────────────────────────');
+  lines.push(`*TOTAL COUNTED:* ${curr.symbol} ${formatNumber(grandTotal)}`);
+  lines.push(`*Total Banknotes:* ${formatNumber(totalNotes)} pcs (${(totalNotes / 100).toFixed(1)} bundles)`);
+  lines.push(`*In Words:* ${numberToWords(grandTotal, curr.wordSystem)}`);
 
-  const exp = parseFloat(document.getElementById('expectedAmountInput')?.value);
+  const exp = parseFloat(document.getElementById('expectedCashInput')?.value);
   if (!isNaN(exp) && exp > 0) {
     const diff = grandTotal - exp;
-    lines.push(`Expected: ${curr.symbol} ${formatNumber(exp)}`);
-    lines.push(`Difference: ${diff === 0 ? 'Balanced (0)' : (diff > 0 ? '+' : '-') + curr.symbol + ' ' + formatNumber(Math.abs(diff))}`);
-    lines.push('────────────────────────');
+    lines.push('──────────────────────────────');
+    lines.push(`Expected POS Amount: ${curr.symbol} ${formatNumber(exp)}`);
+    lines.push(`Closing Variance: ${diff === 0 ? 'Balanced (0)' : (diff > 0 ? '+' : '-') + curr.symbol + ' ' + formatNumber(Math.abs(diff))}`);
   }
 
-  return { text: lines.join('\n'), total: grandTotal };
+  lines.push('──────────────────────────────');
+  lines.push('✨ Powered by Bilal Cash Desk™ Pro');
+
+  return { text: lines.join('\n'), grandTotal, totalNotes };
 }
 
-function copySlipText() {
-  const { text, total } = getSlipSummaryText();
-  if (total === 0) {
+function copyReportSummary() {
+  const { text, grandTotal } = getSlipTextSummary();
+  if (grandTotal === 0) {
     showToast('Count some notes first!');
     return;
   }
-
   navigator.clipboard.writeText(text).then(() => {
-    showToast('✓ Cash slip copied to clipboard!');
+    showToast('✓ Summary copied to clipboard!');
   }).catch(() => {
-    showToast('Could not copy text.');
+    showToast('Could not copy to clipboard.');
   });
 }
 
 function shareViaWhatsApp() {
-  const { text, total } = getSlipSummaryText();
-  if (total === 0) {
+  const { text, grandTotal } = getSlipTextSummary();
+  if (grandTotal === 0) {
     showToast('Count some notes first!');
     return;
   }
-
-  const encoded = encodeURIComponent(text);
-  window.open(`https://api.whatsapp.com/send?text=${encoded}`, '_blank');
+  window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
 }
 
-function printCashSlip() {
+function printThermalReceipt() {
   const curr = CURRENCIES[currentCurrency];
-  let grandTotal = 0;
-  let totalNotes = 0;
+  let grandTotal = 0, totalNotes = 0;
   let rowsHtml = '';
 
   curr.denominations.forEach(denom => {
@@ -882,8 +980,9 @@ function printCashSlip() {
       grandTotal += sub;
       totalNotes += count;
       rowsHtml += `
-        <div class="slip-row">
-          <span>${curr.symbol} ${denom} × ${count}</span>
+        <div class="receipt-row">
+          <span>${curr.symbol} ${denom}</span>
+          <span>${count}</span>
           <span>${curr.symbol} ${formatNumber(sub)}</span>
         </div>
       `;
@@ -895,121 +994,103 @@ function printCashSlip() {
     return;
   }
 
-  document.getElementById('slipTimestamp').innerText = `Date: ${new Date().toLocaleString()} (${currentCurrency})`;
-  document.getElementById('slipTableContent').innerHTML = rowsHtml;
-  document.getElementById('slipTotalAmount').innerText = `${curr.symbol} ${formatNumber(grandTotal)}`;
-  document.getElementById('slipTotalNotes').innerText = `${totalNotes} pcs`;
-  document.getElementById('slipWords').innerText = numberToWords(grandTotal, curr.wordFormat);
+  const exp = parseFloat(document.getElementById('expectedCashInput')?.value) || 0;
+  const diff = grandTotal - exp;
+
+  document.getElementById('rcptTimestamp').innerText = new Date().toLocaleString();
+  document.getElementById('rcptCurrency').innerText = `${currentCurrency} (${curr.symbol})`;
+  document.getElementById('rcptNotesRows').innerHTML = rowsHtml;
+  document.getElementById('rcptGrandTotal').innerText = `${curr.symbol} ${formatNumber(grandTotal)}`;
+  document.getElementById('rcptTotalNotes').innerText = `${totalNotes} pcs`;
+  document.getElementById('rcptExpected').innerText = `${curr.symbol} ${formatNumber(exp)}`;
+  document.getElementById('rcptDiff').innerText = exp === 0 ? 'N/A' : (diff === 0 ? 'Balanced (0)' : (diff > 0 ? '+' : '-') + `${curr.symbol} ${formatNumber(Math.abs(diff))}`);
+  document.getElementById('rcptWordsText').innerText = numberToWords(grandTotal, curr.wordSystem);
 
   window.print();
 }
 
-// Toast Notifications
+// Toast Alert
 let toastTimer = null;
 function showToast(msg) {
-  const toast = document.getElementById('toast');
+  const toast = document.getElementById('toastAlert');
   if (!toast) return;
-
   toast.innerHTML = `<span>⚡</span> <span>${msg}</span>`;
   toast.classList.remove('hidden');
-
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => {
-    toast.classList.add('hidden');
-  }, 2500);
+  toastTimer = setTimeout(() => { toast.classList.add('hidden'); }, 2600);
 }
 
-// Tab Switching
-function switchTab(tabId) {
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+// Master Tab Navigation
+function switchMasterTab(tabId) {
+  document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active'));
 
-  const activeBtn = document.querySelector(`.tab-btn[data-tab="${tabId}"]`);
+  const activeBtn = document.querySelector(`.nav-tab[data-tab="${tabId}"]`);
   const activePane = document.getElementById(tabId);
 
   if (activeBtn) activeBtn.classList.add('active');
   if (activePane) activePane.classList.add('active');
 }
 
-// Toggle Sound
-function toggleSound() {
+// Sound & Voice Toggles
+function toggleSoundEffect() {
   soundEnabled = !soundEnabled;
-  const soundOn = document.getElementById('soundOnIcon');
-  const soundOff = document.getElementById('soundOffIcon');
-
-  if (soundEnabled) {
-    soundOn.classList.remove('hidden');
-    soundOff.classList.add('hidden');
-    showToast('Sound enabled');
-  } else {
-    soundOn.classList.add('hidden');
-    soundOff.classList.remove('hidden');
-    showToast('Sound muted');
-  }
+  document.getElementById('soundToggle')?.classList.toggle('active', soundEnabled);
+  showToast(soundEnabled ? 'Sound enabled' : 'Sound muted');
 }
 
-// DOM Initialization
+function toggleVoiceAnnouncer() {
+  voiceEnabled = !voiceEnabled;
+  document.getElementById('voiceToggle')?.classList.toggle('active', voiceEnabled);
+  showToast(voiceEnabled ? 'Voice announcer enabled' : 'Voice muted');
+  if (voiceEnabled) speakCurrentTotal();
+}
+
+// Initialize Application
 document.addEventListener('DOMContentLoaded', () => {
-  // Load saved theme and currency
-  const savedTheme = localStorage.getItem('cash_counter_theme') || 'dark';
+  startClock();
+
+  // Load Saved Preferences
+  const savedTheme = localStorage.getItem('bilal_cash_theme') || 'dark';
   setTheme(savedTheme);
 
-  const savedCurr = localStorage.getItem('cash_counter_currency') || 'PKR';
+  const savedCurr = localStorage.getItem('bilal_cash_currency') || 'PKR';
   const currSelect = document.getElementById('currencySelect');
-  if (currSelect) {
-    currSelect.value = savedCurr;
-  }
+  if (currSelect) currSelect.value = savedCurr;
   setCurrency(savedCurr);
 
-  loadKhata();
-  loadHistory();
+  loadKhataRecords();
+  loadHistoryRecords();
 
-  // Tab Navigation
-  document.querySelectorAll('.tab-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      switchTab(btn.dataset.tab);
-    });
+  // Navigation Tabs
+  document.querySelectorAll('.nav-tab').forEach(btn => {
+    btn.addEventListener('click', () => { switchMasterTab(btn.dataset.tab); });
   });
 
-  // Currency Selector
-  currSelect?.addEventListener('change', (e) => {
-    setCurrency(e.target.value);
+  // Language & Theme Controls
+  document.getElementById('langToggleBtn')?.addEventListener('click', toggleLanguage);
+  document.querySelectorAll('.theme-option-btn').forEach(btn => {
+    btn.addEventListener('click', () => { setTheme(btn.dataset.theme); });
   });
 
-  // Theme Buttons
-  document.querySelectorAll('.theme-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      setTheme(btn.dataset.theme);
-    });
-  });
+  // Currency Dropdown
+  currSelect?.addEventListener('change', (e) => { setCurrency(e.target.value); });
 
-  // Sound Toggle
-  document.getElementById('soundToggle')?.addEventListener('click', toggleSound);
+  // Voice & Sound
+  document.getElementById('soundToggle')?.addEventListener('click', toggleSoundEffect);
+  document.getElementById('voiceToggle')?.addEventListener('click', toggleVoiceAnnouncer);
 
-  // Counter Reset
-  document.getElementById('btnResetTally')?.addEventListener('click', resetCounter);
-
-  // Expected Cash Input
-  document.getElementById('expectedAmountInput')?.addEventListener('input', () => {
+  // Counter Actions
+  document.getElementById('btnResetCounter')?.addEventListener('click', resetDeskCounter);
+  document.getElementById('expectedCashInput')?.addEventListener('input', () => {
     const curr = CURRENCIES[currentCurrency];
     let grandTotal = 0;
     curr.denominations.forEach(d => { grandTotal += (countState[d] || 0) * d; });
-    checkDifference(grandTotal);
+    checkReconciliation(grandTotal);
   });
 
-  // Action Buttons
-  document.getElementById('btnSaveRecord')?.addEventListener('click', saveCurrentToHistory);
-  document.getElementById('btnCopySlip')?.addEventListener('click', copySlipText);
-  document.getElementById('btnShareWhatsApp')?.addEventListener('click', shareViaWhatsApp);
-  document.getElementById('btnPrintSlip')?.addEventListener('click', printCashSlip);
-
-  // Breakdown Tab
-  document.getElementById('btnComputeBreakdown')?.addEventListener('click', computeAmountBreakdown);
-  document.getElementById('breakdownInput')?.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') computeAmountBreakdown();
-  });
-  document.getElementById('btnApplyToCounter')?.addEventListener('click', applyBreakdownToCounter);
-
-  // History Tab
-  document.getElementById('btnClearHistory')?.addEventListener('click', clearAllHistory);
+  document.getElementById('btnSaveShiftLog')?.addEventListener('click', saveCurrentShiftLog);
+  document.getElementById('btnCopyReport')?.addEventListener('click', copyReportSummary);
+  document.getElementById('btnWhatsAppShare')?.addEventListener('click', shareViaWhatsApp);
+  document.getElementById('btnPrintReceipt')?.addEventListener('click', printThermalReceipt);
 });

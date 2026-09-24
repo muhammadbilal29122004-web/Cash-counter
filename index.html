@@ -3,506 +3,659 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Smart Cash Counter & Khata Ledger</title>
-  <meta name="description" content="Professional Multi-Currency Cash Counter, Cash In/Cash Out Khata Ledger, Denomination Breakdown, and Excel Export.">
+  <title>Bilal Cash Desk™ Pro &bull; Enterprise Cash Counter & POS Khata</title>
+  <meta name="description" content="Professional Enterprise Cash Management, Multi-Currency Denomination Counter, Bundle Calculator, POS Khata Ledger, and Thermal Slip Printing.">
   
-  <!-- Google Fonts -->
+  <!-- Modern Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&family=Noto+Nastaliq+Urdu:wght@400;600;700&display=swap" rel="stylesheet">
   
-  <!-- App Stylesheet -->
+  <!-- Main Stylesheet -->
   <link rel="stylesheet" href="app.css">
 </head>
 <body>
+  <!-- Ambient Grid Background -->
   <div class="app-background">
+    <div class="grid-pattern"></div>
     <div class="glow glow-1"></div>
     <div class="glow glow-2"></div>
+    <div class="glow glow-3"></div>
   </div>
 
   <div class="app-container">
-    <!-- Header -->
+    
+    <!-- Top Global Status Bar -->
+    <div class="top-status-bar">
+      <div class="status-left">
+        <span class="live-dot"></span>
+        <span class="system-status-text" id="systemStatusText">SYSTEM ACTIVE &bull; REGISTER OPEN</span>
+        <span class="divider-dot">&bull;</span>
+        <span class="clock-display" id="liveClock">00:00:00</span>
+      </div>
+      <div class="status-right">
+        <span class="cashier-tag" id="cashierBadge">👤 Cashier: <strong>Bilal</strong></span>
+        <span class="terminal-tag">🖥️ POS Terminal #01</span>
+      </div>
+    </div>
+
+    <!-- Header / Brand Section -->
     <header class="app-header">
       <div class="header-brand">
-        <div class="logo-icon">
-          <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="2" y="6" width="20" height="12" rx="2"></rect>
-            <circle cx="12" cy="12" r="2"></circle>
+        <div class="brand-logo-box">
+          <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="4" width="20" height="16" rx="3"></rect>
+            <circle cx="12" cy="12" r="3.5"></circle>
             <path d="M6 12h.01M18 12h.01"></path>
           </svg>
         </div>
-        <div>
-          <div class="title-with-badge">
-            <h1>Smart Cash Counter & Khata</h1>
+        <div class="brand-info">
+          <div class="title-row">
+            <h1>Cash Desk<span class="brand-pro">PRO</span></h1>
             <span class="creator-badge">✨ Credit by Bilal</span>
+            <span class="version-tag">v2.5 Enterprise</span>
           </div>
-          <p class="subtitle">Multi-Currency Denomination Counter & Daily Cash Ledger &bull; Created with ❤️ by Bilal</p>
+          <p class="subtitle" id="headerSubtitle">Smart Denomination Counter &bull; Daily Cash Balancing &bull; Khata Ledger</p>
         </div>
       </div>
       
-      <div class="header-actions">
-        <!-- Currency Selector Dropdown -->
-        <div class="select-wrapper">
-          <label for="currencySelect" class="sr-only">Currency</label>
-          <select id="currencySelect" class="currency-select" title="Change Currency">
-            <option value="PKR" selected>🇵🇰 PKR (₨)</option>
-            <option value="USD">🇺🇸 USD ($)</option>
-            <option value="INR">🇮🇳 INR (₹)</option>
-            <option value="AED">🇦🇪 AED (د.إ)</option>
-            <option value="SAR">🇸🇦 SAR (﷼)</option>
+      <!-- Top Actions: Language, Currency, Theme, Voice, Sound -->
+      <div class="header-controls">
+        
+        <!-- Language Switcher -->
+        <button id="langToggleBtn" class="pill-control-btn" title="Toggle Language (English / اردو)">
+          <span class="control-icon">🌐</span>
+          <span id="langLabel">English</span>
+        </button>
+
+        <!-- Currency Selector -->
+        <div class="custom-select-box">
+          <select id="currencySelect" class="currency-dropdown" title="Select Currency">
+            <option value="PKR" selected>🇵🇰 PKR (₨) - Pakistan</option>
+            <option value="USD">🇺🇸 USD ($) - US Dollar</option>
+            <option value="INR">🇮🇳 INR (₹) - India</option>
+            <option value="AED">🇦🇪 AED (د.إ) - UAE</option>
+            <option value="SAR">🇸🇦 SAR (﷼) - Saudi</option>
+            <option value="GBP">🇬🇧 GBP (£) - British Pound</option>
+            <option value="EUR">🇪🇺 EUR (€) - Euro</option>
           </select>
         </div>
 
         <!-- Theme Switcher -->
-        <div class="theme-selector" title="Switch Theme">
-          <button class="theme-btn active" data-theme="dark" title="Dark Slate">🌙</button>
-          <button class="theme-btn" data-theme="light" title="Clean Light">☀️</button>
-          <button class="theme-btn" data-theme="luxury" title="Luxury Gold">👑</button>
+        <div class="theme-switch-group">
+          <button class="theme-option-btn active" data-theme="dark" title="Dark Slate">🌙</button>
+          <button class="theme-option-btn" data-theme="light" title="Executive Light">☀️</button>
+          <button class="theme-option-btn" data-theme="luxury" title="Emerald Gold">👑</button>
         </div>
 
-        <!-- Sound Toggle -->
-        <button id="soundToggle" class="icon-btn" title="Toggle Sound Feedback">
-          <svg id="soundOnIcon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+        <!-- Voice Announcer Toggle -->
+        <button id="voiceToggle" class="icon-toggle-btn" title="Voice Announcement (Speak Amount)">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
             <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
           </svg>
-          <svg id="soundOffIcon" class="hidden" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+        </button>
+
+        <!-- Sound Click Toggle -->
+        <button id="soundToggle" class="icon-toggle-btn active" title="Sound Effects">
+          <svg id="soundIcon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 8a3 3 0 0 1 0 6"></path>
+            <path d="M22 6a7 7 0 0 1 0 12"></path>
             <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-            <line x1="23" y1="9" x2="17" y2="15"></line>
-            <line x1="17" y1="9" x2="23" y2="15"></line>
           </svg>
         </button>
       </div>
     </header>
 
-    <!-- Navigation Tabs -->
-    <nav class="mode-tabs">
-      <button class="tab-btn active" data-tab="tally-tab" id="btnTabTally">
+    <!-- Master Navigation Tabs -->
+    <nav class="master-tabs">
+      <button class="nav-tab active" data-tab="counter-view" id="tabCounter">
         <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-          <line x1="18" y1="20" x2="18" y2="10"></line>
-          <line x1="12" y1="20" x2="12" y2="4"></line>
-          <line x1="6" y1="20" x2="6" y2="14"></line>
+          <rect x="2" y="3" width="20" height="14" rx="2"></rect>
+          <line x1="8" y1="21" x2="16" y2="21"></line>
+          <line x1="12" y1="17" x2="12" y2="21"></line>
         </svg>
-        <span>Denomination Counter</span>
+        <span data-i18n="tab_counter">Denomination Counter</span>
       </button>
 
-      <button class="tab-btn" data-tab="khata-tab" id="btnTabKhata">
+      <button class="nav-tab" data-tab="khata-view" id="tabKhata">
         <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
           <polyline points="14 2 14 8 20 8"></polyline>
           <line x1="16" y1="13" x2="8" y2="13"></line>
           <line x1="16" y1="17" x2="8" y2="17"></line>
-          <polyline points="10 9 9 9 8 9"></polyline>
         </svg>
-        <span>Cash In/Out (Khata)</span>
+        <span data-i18n="tab_khata">Cash In/Out (Khata)</span>
       </button>
 
-      <button class="tab-btn" data-tab="breakdown-tab" id="btnTabBreakdown">
+      <button class="nav-tab" data-tab="breakdown-view" id="tabBreakdown">
         <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="12" cy="12" r="10"></circle>
-          <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"></path>
-          <path d="M12 6v2m0 8v2"></path>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
         </svg>
-        <span>Amount Breakdown</span>
+        <span data-i18n="tab_breakdown">Dispense / Breakdown</span>
       </button>
 
-      <button class="tab-btn" data-tab="history-tab" id="btnTabHistory">
+      <button class="nav-tab" data-tab="history-view" id="tabHistory">
         <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M12 8v4l3 3"></path>
-          <circle cx="12" cy="12" r="9"></circle>
+          <polyline points="12 8 12 12 14 14"></polyline>
+          <path d="M3.05 11a9 9 0 1 1 .5 4"></path>
+          <path d="M3 16V10h6"></path>
         </svg>
-        <span>Saved Logs (<span id="historyBadge">0</span>)</span>
+        <span data-i18n="tab_history">Closing History (<strong id="historyBadgeCount">0</strong>)</span>
       </button>
     </nav>
 
-    <!-- Main Content Area -->
-    <main class="app-main">
+    <!-- Main Workspace -->
+    <main class="main-workspace">
 
       <!-- ==================== TAB 1: DENOMINATION COUNTER ==================== -->
-      <section id="tally-tab" class="tab-pane active">
-        <div class="grid-layout">
+      <section id="counter-view" class="view-panel active">
+        <div class="counter-grid">
           
-          <!-- Left Column: Denomination Inputs -->
-          <div class="glass-card notes-card">
-            <div class="card-header">
-              <div class="card-title-group">
-                <span class="card-icon">💵</span>
-                <h2>Count Physical Notes</h2>
+          <!-- LEFT COLUMN: Physical Note Counting Table -->
+          <div class="panel-card notes-desk-card">
+            <div class="panel-header">
+              <div class="panel-title">
+                <span class="title-icon">💵</span>
+                <div>
+                  <h2 data-i18n="desk_title">Physical Cash Counter</h2>
+                  <p class="panel-subtitle" data-i18n="desk_subtitle">Enter pieces or bundles of banknotes to tally</p>
+                </div>
               </div>
-              <div class="quick-header-actions">
-                <button class="text-btn" id="btnResetTally" title="Clear all counts">
+              
+              <div class="panel-tools">
+                <!-- Mode toggle: Pieces vs Gaddi/Bundles -->
+                <div class="counting-mode-toggle" title="Switch Input Mode">
+                  <button class="mode-pill active" id="btnModePieces" onclick="setCountMode('pieces')">Loose Pcs</button>
+                  <button class="mode-pill" id="btnModeBundles" onclick="setCountMode('bundles')">Gaddi (100s)</button>
+                </div>
+
+                <button class="danger-btn-text" id="btnResetCounter" title="Reset all rows">
                   <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
                     <path d="M3 3v5h5"></path>
                   </svg>
-                  Reset
+                  <span data-i18n="reset">Reset</span>
                 </button>
               </div>
             </div>
 
-            <!-- Dynamic Notes List -->
-            <div class="denomination-list" id="denominationList">
-              <!-- Injected by JS based on currency -->
+            <!-- Notes List Header -->
+            <div class="notes-table-header">
+              <span class="col-note" data-i18n="col_note">Banknote</span>
+              <span class="col-count" data-i18n="col_count">Quantity / Pcs</span>
+              <span class="col-quick" data-i18n="col_bundles">Quick Add</span>
+              <span class="col-subtotal" data-i18n="col_subtotal">Subtotal</span>
+            </div>
+
+            <!-- Notes List Rows (Injected by JS) -->
+            <div class="denomination-desk-list" id="denominationDeskList">
+              <!-- Dynamically populated -->
+            </div>
+
+            <!-- Keyboard Quick Tip -->
+            <div class="table-footer-tip">
+              <span>💡 <strong>Pro Tip:</strong> Press <kbd>Tab</kbd> or <kbd>Enter</kbd> to jump between notes. Use stepper or bundle chips for rapid counting.</span>
             </div>
           </div>
 
-          <!-- Right Column: Live Summary & Actions -->
-          <div class="summary-column">
-            <!-- Grand Total Card -->
-            <div class="glass-card grand-total-card">
-              <span class="total-label">Total Cash Counted</span>
-              <div class="total-display">
-                <span class="currency-symbol" id="mainCurrencySymbol">Rs.</span>
-                <span id="grandTotalAmount" class="total-num">0</span>
+          <!-- RIGHT COLUMN: Executive Summary, Balancing & Receipt -->
+          <div class="summary-desk-column">
+            
+            <!-- Grand Total Master Widget -->
+            <div class="panel-card master-total-card">
+              <div class="total-header">
+                <span class="total-caption" data-i18n="total_counted">TOTAL COUNTED CASH</span>
+                <button class="speak-btn" id="btnSpeakAmount" title="Speak Amount Aloud" onclick="speakCurrentTotal()">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                    <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+                  </svg>
+                  <span>Listen</span>
+                </button>
+              </div>
+
+              <div class="master-amount-wrapper">
+                <span class="master-currency" id="masterCurrencyLabel">Rs.</span>
+                <span class="master-amount-val" id="masterGrandTotal">0</span>
               </div>
 
               <!-- Amount in Words -->
-              <div class="amount-in-words-box">
-                <span class="words-title">In Words:</span>
-                <p id="amountInWords" class="words-text">Zero Only</p>
+              <div class="amount-words-card">
+                <span class="words-heading" data-i18n="in_words">AMOUNT IN WORDS:</span>
+                <p class="words-output" id="masterWordsDisplay">Zero Only</p>
               </div>
 
-              <!-- Stat Chips -->
-              <div class="stat-chips">
-                <div class="stat-chip">
-                  <span class="stat-chip-label">Total Notes</span>
-                  <span id="totalNotesCount" class="stat-chip-val">0 pcs</span>
+              <!-- Stat Badges -->
+              <div class="summary-metrics-grid">
+                <div class="metric-box">
+                  <span class="metric-label" data-i18n="total_pieces">Total Banknotes</span>
+                  <span class="metric-num" id="metricTotalNotes">0 pcs</span>
                 </div>
-                <div class="stat-chip">
-                  <span class="stat-chip-label">High Notes (≥500)</span>
-                  <span id="highValPercent" class="stat-chip-val">0%</span>
+                <div class="metric-box">
+                  <span class="metric-label" data-i18n="gaddis_count">Full Bundles (100s)</span>
+                  <span class="metric-num" id="metricTotalGaddis">0 pkt</span>
+                </div>
+                <div class="metric-box">
+                  <span class="metric-label" data-i18n="high_val">High Notes (≥500)</span>
+                  <span class="metric-num" id="metricHighVal">0%</span>
+                </div>
+                <div class="metric-box">
+                  <span class="metric-label" data-i18n="avg_note">Avg. Value / Note</span>
+                  <span class="metric-num" id="metricAvgNote">0</span>
                 </div>
               </div>
             </div>
 
-            <!-- Cash Balancing / Difference Checker -->
-            <div class="glass-card balance-card">
-              <div class="balance-header">
-                <h3>Cash Register Reconciliation</h3>
-                <span class="badge" id="balanceStatusBadge">Counting</span>
+            <!-- Cash Drawer Balancing / Shift Reconciliation -->
+            <div class="panel-card reconciliation-card">
+              <div class="reconcile-header">
+                <div class="reconcile-title">
+                  <span class="reconcile-icon">⚖️</span>
+                  <div>
+                    <h3 data-i18n="reconciliation_title">Register Closing & Balancing</h3>
+                    <p class="section-micro-desc" data-i18n="reconciliation_desc">Compare physical cash with opening / POS expected</p>
+                  </div>
+                </div>
+                <span class="status-badge badge-neutral" id="reconcileBadge">COUNTING</span>
               </div>
-              <p class="section-desc">Enter expected closing cash to calculate short / excess:</p>
+
+              <div class="reconcile-inputs">
+                <div class="reconcile-field">
+                  <label for="expectedCashInput" data-i18n="expected_cash">Expected POS Amount</label>
+                  <div class="input-addon">
+                    <span class="addon-symbol" id="reconcileCurrPrefix">Rs.</span>
+                    <input type="number" id="expectedCashInput" placeholder="Enter expected cash in drawer" min="0">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Difference Box -->
+              <div id="reconcileDiffContainer" class="reconcile-diff-box hidden">
+                <div class="diff-main-row">
+                  <span class="diff-title-label" id="diffStatusLabel">Difference Status:</span>
+                  <span class="diff-amount-label" id="diffAmountValue">0</span>
+                </div>
+                <p class="diff-explanation" id="diffExplanationText"></p>
+              </div>
+            </div>
+
+            <!-- Executive Actions & Printing Suite -->
+            <div class="panel-card actions-desk-card">
+              <h3 data-i18n="receipt_actions">Shift Actions & Reports</h3>
               
-              <div class="input-with-symbol">
-                <span class="symbol-affix" id="diffCurrencySymbol">Rs.</span>
-                <input type="number" id="expectedAmountInput" placeholder="Expected cash in hand" min="0">
-              </div>
-
-              <div id="differenceResultBox" class="diff-result-box hidden">
-                <div class="diff-row">
-                  <span class="diff-title" id="diffTitle">Difference:</span>
-                  <span class="diff-val" id="diffValue">0</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Action Tools -->
-            <div class="glass-card actions-card">
-              <h3>Receipt & Quick Actions</h3>
-              <div class="action-buttons-grid">
-                <button class="action-btn primary" id="btnSaveRecord">
+              <div class="actions-desk-grid">
+                <button class="desk-action-btn primary-glow-btn" id="btnSaveShiftLog">
                   <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
                     <polyline points="17 21 17 13 7 13 7 21"></polyline>
-                    <polyline points="7 3 7 8 15 8"></polyline>
                   </svg>
-                  Save to Log
+                  <span data-i18n="save_log">Save Shift Record</span>
                 </button>
 
-                <button class="action-btn secondary" id="btnCopySlip">
+                <button class="desk-action-btn secondary-btn" id="btnCopyReport">
                   <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <rect x="9" y="9" width="13" height="13" rx="2"></rect>
                     <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
                   </svg>
-                  Copy Text
+                  <span data-i18n="copy_summary">Copy Text</span>
                 </button>
 
-                <button class="action-btn secondary" id="btnShareWhatsApp">
+                <button class="desk-action-btn secondary-btn" id="btnWhatsAppShare">
                   <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
                     <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2zm5.79 14.07c-.24.68-1.39 1.3-1.92 1.38-.5.08-1.14.12-3.32-.78-2.61-1.08-4.29-3.73-4.42-3.9-.13-.18-1.06-1.41-1.06-2.69 0-1.28.67-1.91.91-2.17.24-.26.52-.33.7-.33.17 0 .35 0 .5.01.16.01.37-.06.58.44.22.52.74 1.81.81 1.94.06.14.11.3.02.48-.09.18-.13.29-.26.44-.13.15-.28.34-.4.46-.13.13-.27.28-.12.54.16.26.7 1.15 1.5 1.86 1.03.92 1.9 1.2 2.17 1.33.27.13.43.11.59-.07.16-.18.69-.81.87-1.08.18-.28.37-.23.62-.14.25.09 1.59.75 1.86.88.27.14.45.2.52.31.06.13.06.74-.18 1.42z"/>
                   </svg>
-                  WhatsApp
+                  <span>WhatsApp</span>
                 </button>
 
-                <button class="action-btn secondary" id="btnPrintSlip">
+                <button class="desk-action-btn secondary-btn" id="btnPrintReceipt">
                   <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
                     <polyline points="6 9 6 2 18 2 18 9"></polyline>
                     <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
                     <rect x="6" y="14" width="12" height="8"></rect>
                   </svg>
-                  Print Slip
+                  <span data-i18n="print_slip">Print Receipt</span>
                 </button>
               </div>
             </div>
+
           </div>
         </div>
       </section>
 
       <!-- ==================== TAB 2: CASH IN / CASH OUT (KHATA) ==================== -->
-      <section id="khata-tab" class="tab-pane">
-        <div class="khata-container">
+      <section id="khata-view" class="view-panel">
+        <div class="khata-workspace">
           
-          <!-- Khata Overview Stats -->
-          <div class="khata-stats-grid">
-            <div class="glass-card stat-card in-card">
-              <div class="stat-card-header">
-                <span class="stat-label">Total Cash In (آمدنی)</span>
-                <span class="stat-icon-badge in-bg">🟢 +</span>
+          <!-- Summary Banner -->
+          <div class="khata-kpi-cards">
+            <div class="panel-card kpi-card in-kpi">
+              <div class="kpi-header">
+                <span class="kpi-label" data-i18n="khata_in">Total Cash IN (آمدنی)</span>
+                <span class="kpi-badge in-tag">🟢 +IN</span>
               </div>
-              <div class="stat-val" id="khataTotalIn">Rs. 0</div>
+              <div class="kpi-value" id="kpiTotalIn">Rs. 0</div>
+              <span class="kpi-footer" id="kpiInEntriesCount">0 Transactions</span>
             </div>
 
-            <div class="glass-card stat-card out-card">
-              <div class="stat-card-header">
-                <span class="stat-label">Total Cash Out (خرچ)</span>
-                <span class="stat-icon-badge out-bg">🔴 −</span>
+            <div class="panel-card kpi-card out-kpi">
+              <div class="kpi-header">
+                <span class="kpi-label" data-i18n="khata_out">Total Cash OUT (خرچ)</span>
+                <span class="kpi-badge out-tag">🔴 −OUT</span>
               </div>
-              <div class="stat-val" id="khataTotalOut">Rs. 0</div>
+              <div class="kpi-value" id="kpiTotalOut">Rs. 0</div>
+              <span class="kpi-footer" id="kpiOutEntriesCount">0 Transactions</span>
             </div>
 
-            <div class="glass-card stat-card net-card">
-              <div class="stat-card-header">
-                <span class="stat-label">Net Cash Balance (خالص رقم)</span>
-                <span class="stat-icon-badge net-bg">💼 =</span>
+            <div class="panel-card kpi-card net-kpi">
+              <div class="kpi-header">
+                <span class="kpi-label" data-i18n="khata_net">Net Cash in Drawer (خالص رقم)</span>
+                <span class="kpi-badge net-tag">💼 BALANCE</span>
               </div>
-              <div class="stat-val" id="khataNetBalance">Rs. 0</div>
+              <div class="kpi-value" id="kpiNetBalance">Rs. 0</div>
+              <span class="kpi-footer">Live Calculated Balance</span>
             </div>
           </div>
 
-          <div class="grid-layout khata-layout">
-            <!-- Add Transaction Form -->
-            <div class="glass-card khata-form-card">
-              <div class="card-header">
-                <div class="card-title-group">
-                  <span class="card-icon">📝</span>
-                  <h2>New Entry (اندراج کریں)</h2>
+          <div class="khata-main-grid">
+            
+            <!-- Add New Transaction Form -->
+            <div class="panel-card khata-form-panel">
+              <div class="panel-header">
+                <div class="panel-title">
+                  <span class="title-icon">✍️</span>
+                  <div>
+                    <h2 data-i18n="new_entry_title">New Khata Transaction</h2>
+                    <p class="panel-subtitle" data-i18n="new_entry_sub">Record sales, payments, purchases or expenses</p>
+                  </div>
                 </div>
               </div>
 
-              <form id="khataForm" class="khata-form" onsubmit="handleKhataSubmit(event)">
-                <!-- Entry Type Selector -->
-                <div class="type-toggle-group">
-                  <button type="button" class="type-toggle-btn active-in" id="typeBtnIn" onclick="setKhataType('IN')">
+              <form id="khataEntryForm" class="khata-form-body" onsubmit="handleKhataSubmit(event)">
+                
+                <!-- Type Selection -->
+                <div class="khata-type-selector">
+                  <button type="button" class="type-pill-btn active-in" id="typeInBtn" onclick="setKhataType('IN')">
                     🟢 Cash IN (آمدنی)
                   </button>
-                  <button type="button" class="type-toggle-btn" id="typeBtnOut" onclick="setKhataType('OUT')">
+                  <button type="button" class="type-pill-btn" id="typeOutBtn" onclick="setKhataType('OUT')">
                     🔴 Cash OUT (خرچ)
                   </button>
                 </div>
 
-                <div class="form-group">
-                  <label for="khataAmount">Amount (<span class="khata-curr-label">Rs</span>)</label>
-                  <input type="number" id="khataAmount" placeholder="Enter amount" min="1" step="any" required>
-                </div>
-
-                <div class="form-group">
-                  <label for="khataParty">Party / Customer / Person Name</label>
-                  <input type="text" id="khataParty" placeholder="e.g. Ali Ahmed, Ali Store, Self" required>
+                <div class="form-row">
+                  <div class="form-control-box">
+                    <label for="khataAmountInput">Amount (<span class="khata-curr-symbol">Rs.</span>) *</label>
+                    <input type="number" id="khataAmountInput" placeholder="e.g. 15000" min="1" step="any" required>
+                  </div>
+                  
+                  <div class="form-control-box">
+                    <label for="khataPartyInput">Party / Customer / Person Name *</label>
+                    <input type="text" id="khataPartyInput" placeholder="e.g. Ahmed Traders, Self, Ali" required>
+                  </div>
                 </div>
 
                 <div class="form-row">
-                  <div class="form-group">
-                    <label for="khataCategory">Category</label>
-                    <select id="khataCategory">
-                      <option value="Sale / Payment">Sale / Daily Sale</option>
-                      <option value="Customer Khata">Customer Payment</option>
-                      <option value="Supplier / Goods">Supplier / Stock Purchase</option>
-                      <option value="Expense / Bill">Electricity / Utility Bill</option>
-                      <option value="Salary / Wages">Staff Salary / Daily Wages</option>
-                      <option value="Food & Tea">Food & Tea / Refreshment</option>
-                      <option value="Rent">Shop / Office Rent</option>
-                      <option value="Other">Other Miscellaneous</option>
+                  <div class="form-control-box">
+                    <label for="khataCategorySelect">Category</label>
+                    <select id="khataCategorySelect">
+                      <option value="Daily Sale">Daily Cash Sale</option>
+                      <option value="Customer Recovery">Customer Payment / Recovery</option>
+                      <option value="Stock / Goods Purchase">Stock / Goods Purchase</option>
+                      <option value="Electricity / Bills">Utility / Electricity Bill</option>
+                      <option value="Staff Salary / Daily Wages">Staff Salary / Daily Wages</option>
+                      <option value="Shop Rent">Shop / Office Rent</option>
+                      <option value="Tea & Refreshment">Tea & Refreshments</option>
+                      <option value="Bank Deposit / Withdrawal">Bank Deposit / Withdrawal</option>
+                      <option value="Miscellaneous Expense">Miscellaneous Expense</option>
                     </select>
                   </div>
 
-                  <div class="form-group">
-                    <label for="khataMode">Payment Mode</label>
-                    <select id="khataMode">
-                      <option value="Cash">Cash (نقد)</option>
+                  <div class="form-control-box">
+                    <label for="khataPaymentMode">Payment Method</label>
+                    <select id="khataPaymentMode">
+                      <option value="Cash (نقد)">Cash (نقد)</option>
                       <option value="Bank Transfer">Bank Transfer / Raast</option>
-                      <option value="EasyPaisa / JazzCash">EasyPaisa / JazzCash</option>
+                      <option value="JazzCash / EasyPaisa">JazzCash / EasyPaisa</option>
+                      <option value="Cheque">Cheque</option>
                     </select>
                   </div>
                 </div>
 
-                <div class="form-group">
-                  <label for="khataRemark">Note / Details (Optional)</label>
-                  <input type="text" id="khataRemark" placeholder="Optional details or invoice #">
+                <div class="form-control-box">
+                  <label for="khataNotesInput">Remarks / Note / Invoice # (Optional)</label>
+                  <input type="text" id="khataNotesInput" placeholder="Optional details, invoice # or reference">
                 </div>
 
-                <button type="submit" class="action-btn primary w-full" id="btnSubmitKhata">
-                  ➕ Save Khata Entry
+                <button type="submit" class="desk-action-btn primary-glow-btn w-full">
+                  ➕ Save Transaction to Ledger
                 </button>
               </form>
             </div>
 
-            <!-- Transactions List & Excel Export -->
-            <div class="glass-card khata-list-card">
-              <div class="card-header">
-                <div class="card-title-group">
-                  <span class="card-icon">📋</span>
-                  <h2>Daily Ledger Entries</h2>
+            <!-- Ledger Entries Table & Export -->
+            <div class="panel-card khata-table-panel">
+              <div class="panel-header">
+                <div class="panel-title">
+                  <span class="title-icon">📑</span>
+                  <div>
+                    <h2 data-i18n="ledger_title">Daily Cash Register Log</h2>
+                    <p class="panel-subtitle">All entries recorded during this shift</p>
+                  </div>
                 </div>
-                <div class="khata-tools">
-                  <button class="action-btn excel-btn" id="btnExportExcel" onclick="exportKhataToCSV()">
+
+                <div class="ledger-export-tools">
+                  <button class="excel-download-btn" onclick="exportKhataToCSV()">
                     📊 Export Excel (CSV)
                   </button>
-                  <button class="text-btn" id="btnClearKhata" onclick="clearAllKhata()">
+                  <button class="danger-btn-text" onclick="clearAllKhata()">
                     Clear All
                   </button>
                 </div>
               </div>
 
               <!-- Filter Tabs -->
-              <div class="filter-chips">
-                <button class="filter-chip active" onclick="filterKhata('ALL', this)">All Entries (<span id="countAll">0</span>)</button>
-                <button class="filter-chip" onclick="filterKhata('IN', this)">🟢 Cash IN (<span id="countIn">0</span>)</button>
-                <button class="filter-chip" onclick="filterKhata('OUT', this)">🔴 Cash OUT (<span id="countOut">0</span>)</button>
+              <div class="ledger-filter-row">
+                <button class="filter-pill active" onclick="filterKhata('ALL', this)">All Records (<span id="badgeFilterAll">0</span>)</button>
+                <button class="filter-pill in-pill" onclick="filterKhata('IN', this)">🟢 Cash IN (<span id="badgeFilterIn">0</span>)</button>
+                <button class="filter-pill out-pill" onclick="filterKhata('OUT', this)">🔴 Cash OUT (<span id="badgeFilterOut">0</span>)</button>
               </div>
 
-              <div id="khataEntriesList" class="khata-entries-scroll">
-                <!-- Injected by JS -->
+              <!-- Entries List Scroll -->
+              <div id="khataEntriesScroll" class="khata-entries-container">
+                <!-- Dynamically populated -->
               </div>
             </div>
+
           </div>
         </div>
       </section>
 
-      <!-- ==================== TAB 3: AMOUNT BREAKDOWN ==================== -->
-      <section id="breakdown-tab" class="tab-pane">
-        <div class="breakdown-container glass-card">
-          <div class="breakdown-header">
-            <div>
-              <h2>Cash Breakdown Calculator</h2>
-              <p class="subtitle">Enter target amount to calculate exact note count needed for dispensing / withdrawal</p>
+      <!-- ==================== TAB 3: DISPENSE / BREAKDOWN CALCULATOR ==================== -->
+      <section id="breakdown-view" class="view-panel">
+        <div class="breakdown-desk-container panel-card">
+          <div class="panel-header">
+            <div class="panel-title">
+              <span class="title-icon">🧮</span>
+              <div>
+                <h2>Optimal Note Dispenser & Breakdown</h2>
+                <p class="panel-subtitle">Calculate minimum banknote combinations required to pay or withdraw any exact amount</p>
+              </div>
             </div>
           </div>
 
-          <div class="breakdown-form">
-            <div class="breakdown-input-wrapper">
-              <label for="breakdownInput">Enter Total Amount</label>
-              <div class="input-with-symbol big-input">
-                <span class="symbol-affix" id="breakdownCurrencySymbol">Rs.</span>
-                <input 
-                  type="number" 
-                  id="breakdownInput" 
-                  placeholder="e.g. 78500" 
-                  min="0"
-                  step="1"
-                >
-                <button id="btnComputeBreakdown" class="compute-btn">Calculate Breakdown</button>
+          <div class="breakdown-calculator-form">
+            <div class="input-target-box">
+              <label for="breakdownTargetInput">Enter Target Payout Amount</label>
+              <div class="large-input-wrapper">
+                <span class="large-curr-symbol" id="breakdownCurrSymbol">Rs.</span>
+                <input type="number" id="breakdownTargetInput" placeholder="e.g. 78,500" min="1" step="1">
+                <button id="btnRunBreakdown" class="btn-calculate" onclick="computeAmountBreakdown()">Calculate</button>
               </div>
             </div>
 
             <!-- Quick Presets -->
-            <div class="quick-presets">
-              <span class="preset-label">Quick Amounts:</span>
-              <button class="preset-pill" onclick="setBreakdownAmount(5000)">5,000</button>
-              <button class="preset-pill" onclick="setBreakdownAmount(10000)">10,000</button>
-              <button class="preset-pill" onclick="setBreakdownAmount(25000)">25,000</button>
-              <button class="preset-pill" onclick="setBreakdownAmount(50000)">50,000</button>
-              <button class="preset-pill" onclick="setBreakdownAmount(100000)">100,000</button>
+            <div class="quick-amount-chips">
+              <span class="chip-title">Quick Amounts:</span>
+              <button class="amount-chip" onclick="setBreakdownAmount(5000)">5,000</button>
+              <button class="amount-chip" onclick="setBreakdownAmount(10000)">10,000</button>
+              <button class="amount-chip" onclick="setBreakdownAmount(25000)">25,000</button>
+              <button class="amount-chip" onclick="setBreakdownAmount(50000)">50,000</button>
+              <button class="amount-chip" onclick="setBreakdownAmount(100000)">100,000</button>
+              <button class="amount-chip" onclick="setBreakdownAmount(500000)">500,000</button>
             </div>
           </div>
 
-          <!-- Breakdown Results Display -->
-          <div id="breakdownResultsSection" class="breakdown-results-wrapper hidden">
-            <div class="breakdown-summary-banner">
-              <div class="banner-item">
-                <span class="banner-sub">Target Amount</span>
-                <h3 id="targetAmountDisplay">Rs. 0</h3>
+          <!-- Breakdown Results -->
+          <div id="breakdownResultWrap" class="breakdown-result-desk hidden">
+            <div class="breakdown-kpi-banner">
+              <div class="breakdown-kpi-item">
+                <span class="bk-sub">Target Amount</span>
+                <h3 id="bkTargetAmount">Rs. 0</h3>
               </div>
-              <div class="banner-item">
-                <span class="banner-sub">Total Notes Required</span>
-                <h3 id="targetNotesCountDisplay">0 Notes</h3>
+              <div class="breakdown-kpi-item">
+                <span class="bk-sub">Total Banknotes</span>
+                <h3 id="bkTotalNotes">0 Notes</h3>
               </div>
-              <div class="banner-item">
-                <span class="banner-sub">Remainder / Coins</span>
-                <h3 id="targetRemainderDisplay">Rs. 0</h3>
+              <div class="breakdown-kpi-item">
+                <span class="bk-sub">Remainder / Loose</span>
+                <h3 id="bkRemainder">Rs. 0</h3>
               </div>
             </div>
 
-            <div class="breakdown-cards-grid" id="breakdownCardsGrid">
+            <div class="breakdown-tiles-desk" id="breakdownTilesDesk">
               <!-- Rendered by JS -->
             </div>
 
-            <div class="breakdown-action-row">
-              <button class="action-btn secondary" id="btnApplyToCounter">
-                Transfer to Denomination Counter ➡️
+            <div class="breakdown-transfer-bar">
+              <button class="desk-action-btn secondary-btn" onclick="applyBreakdownToCounter()">
+                📥 Transfer to Physical Counter ➡️
               </button>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- ==================== TAB 4: HISTORY LOGS ==================== -->
-      <section id="history-tab" class="tab-pane">
-        <div class="glass-card history-container">
-          <div class="history-header">
-            <div>
-              <h2>Saved Cash Count Records</h2>
-              <p class="subtitle">History of previous cash balances and closing counts</p>
+      <!-- ==================== TAB 4: SHIFT CLOSING HISTORY ==================== -->
+      <section id="history-view" class="view-panel">
+        <div class="history-desk-container panel-card">
+          <div class="panel-header">
+            <div class="panel-title">
+              <span class="title-icon">🗄️</span>
+              <div>
+                <h2>Saved Shift Closings & Audit History</h2>
+                <p class="panel-subtitle">Archived cash tally records saved on this terminal</p>
+              </div>
             </div>
-            <div class="history-tools">
-              <button class="action-btn danger-sm" id="btnClearHistory">
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
-                  <polyline points="3 6 5 6 21 6"></polyline>
-                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                </svg>
-                Clear All
-              </button>
-            </div>
+
+            <button class="danger-btn-text" onclick="clearAllHistory()">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              </svg>
+              Clear History
+            </button>
           </div>
 
-          <div id="historyList" class="history-list">
-            <!-- Rendered by JS -->
+          <div id="historyRecordsList" class="history-records-desk">
+            <!-- Dynamically populated -->
           </div>
         </div>
       </section>
 
     </main>
 
-    <!-- Footer -->
+    <!-- Professional Footer -->
     <footer class="app-footer">
-      <p>Smart Cash Counter &bull; Designed for Cashiers, Retailers & Business Accounts</p>
+      <div class="footer-content">
+        <div class="footer-left">
+          <p><strong>Bilal Cash Desk™ Pro</strong> &bull; Enterprise Cash Counter & Point of Sale Ledger</p>
+          <p class="footer-sub">Designed & Engineered with ❤️ by <strong>Muhammad Bilal</strong> for Cashiers, Retailers & Financial Desks</p>
+        </div>
+        <div class="footer-right">
+          <span class="security-badge">🔒 Local Offline Storage &bull; 100% Private & Secure</span>
+        </div>
+      </div>
     </footer>
   </div>
 
-  <!-- Toast Notification Container -->
-  <div id="toast" class="toast hidden"></div>
+  <!-- Toast Notification Alert -->
+  <div id="toastAlert" class="toast-alert hidden"></div>
 
-  <!-- Printable Receipt Modal / Section -->
-  <div id="printableSlip" class="printable-slip">
-    <div class="slip-header">
-      <h2>CASH COUNT SLIP</h2>
-      <p id="slipTimestamp">Date: 2026-09-24</p>
+  <!-- Thermal Receipt Printable Slip (Optimized for 80mm / 58mm Thermal Printers & A4 PDF) -->
+  <div id="printableThermalSlip" class="thermal-receipt-slip">
+    <div class="receipt-brand">
+      <h2>BILAL CASH DESK PRO</h2>
+      <p class="receipt-sub">CASH RECONCILIATION & CLOSING SLIP</p>
     </div>
-    <hr class="slip-divider">
-    <div class="slip-table" id="slipTableContent">
+    
+    <div class="receipt-divider">================================</div>
+    
+    <div class="receipt-meta-grid">
+      <div class="receipt-row"><span>Date & Time:</span><strong id="rcptTimestamp">-</strong></div>
+      <div class="receipt-row"><span>Cashier:</span><strong>Muhammad Bilal</strong></div>
+      <div class="receipt-row"><span>Terminal ID:</span><strong>POS-01 (Main Desk)</strong></div>
+      <div class="receipt-row"><span>Currency:</span><strong id="rcptCurrency">PKR (Rs)</strong></div>
+    </div>
+
+    <div class="receipt-divider">--------------------------------</div>
+    <div class="receipt-row header-row">
+      <span>DENOM</span>
+      <span>QTY</span>
+      <span>SUBTOTAL</span>
+    </div>
+    <div class="receipt-divider">--------------------------------</div>
+
+    <div id="rcptNotesRows" class="rcpt-table-body">
       <!-- Injected by JS -->
     </div>
-    <hr class="slip-divider">
-    <div class="slip-totals">
-      <div class="slip-row bold">
-        <span>TOTAL AMOUNT:</span>
-        <span id="slipTotalAmount">Rs. 0</span>
+
+    <div class="receipt-divider">================================</div>
+
+    <div class="rcpt-totals-section">
+      <div class="receipt-row grand-row">
+        <span>TOTAL CASH COUNTED:</span>
+        <strong id="rcptGrandTotal">Rs. 0</strong>
       </div>
-      <div class="slip-row">
-        <span>Total Notes:</span>
-        <span id="slipTotalNotes">0</span>
+      <div class="receipt-row">
+        <span>Total Banknotes:</span>
+        <strong id="rcptTotalNotes">0 pcs</strong>
       </div>
-      <div class="slip-words">
-        <span>Words:</span>
-        <p id="slipWords"></p>
+      <div class="receipt-row">
+        <span>Expected Cash:</span>
+        <strong id="rcptExpected">Rs. 0</strong>
+      </div>
+      <div class="receipt-row">
+        <span>Variance / Diff:</span>
+        <strong id="rcptDiff">Rs. 0 (Balanced)</strong>
+      </div>
+      <div class="receipt-words">
+        <span>Amount in Words:</span>
+        <p id="rcptWordsText">Zero Rupees Only</p>
       </div>
     </div>
-    <div class="slip-footer">
-      <p>Cashier Signature: __________________</p>
-      <p>Verified By: ______________________</p>
+
+    <div class="receipt-divider">--------------------------------</div>
+    
+    <div class="receipt-signatures">
+      <div class="sig-block">
+        <div class="sig-line"></div>
+        <p>Cashier Signature</p>
+      </div>
+      <div class="sig-block">
+        <div class="sig-line"></div>
+        <p>Manager / Auditor</p>
+      </div>
+    </div>
+
+    <div class="receipt-footer-msg">
+      <p>System Generated via Bilal Cash Desk™ Pro</p>
+      <p>Thank You!</p>
     </div>
   </div>
 
+  <!-- Main JavaScript File -->
   <script src="app.js"></script>
 </body>
 </html>
