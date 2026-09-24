@@ -203,10 +203,39 @@ body {
   box-shadow: 0 0 15px var(--primary-glow);
 }
 
+.title-with-badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
 .header-brand h1 {
   font-size: 1.45rem;
   font-weight: 700;
   letter-spacing: -0.02em;
+}
+
+.creator-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(59, 130, 246, 0.25));
+  border: 1px solid var(--primary);
+  color: var(--primary);
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  letter-spacing: 0.02em;
+  box-shadow: 0 0 14px var(--primary-glow);
+  text-shadow: 0 0 8px var(--primary-glow);
+  animation: pulseGlow 3s infinite alternate;
+}
+
+@keyframes pulseGlow {
+  0% { transform: scale(1); box-shadow: 0 0 10px var(--primary-glow); }
+  100% { transform: scale(1.03); box-shadow: 0 0 18px var(--primary-glow); }
 }
 
 .header-brand .subtitle {
