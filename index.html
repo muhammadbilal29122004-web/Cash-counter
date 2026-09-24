@@ -2,25 +2,350 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Cash Counter</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Cash Counter & Denomination Calculator</title>
+  <meta name="description" content="Modern, fast and accurate Cash Counter and Denomination Breakdown Calculator with Cash Difference, History and Slip Printing.">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- App Stylesheet -->
   <link rel="stylesheet" href="app.css">
 </head>
 <body>
+  <div class="app-background">
+    <div class="glow glow-1"></div>
+    <div class="glow glow-2"></div>
+  </div>
 
-  <h2>Cash Counter</h2>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-brand">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="6" width="20" height="12" rx="2"></rect>
+            <circle cx="12" cy="12" r="2"></circle>
+            <path d="M6 12h.01M18 12h.01"></path>
+          </svg>
+        </div>
+        <div>
+          <h1>Smart Cash Counter</h1>
+          <p class="subtitle">Daily Cash Tally & Denomination Breakdown</p>
+        </div>
+      </div>
+      
+      <div class="header-actions">
+        <!-- Currency Badge -->
+        <div class="currency-pill">
+          <span class="currency-flag">🇵🇰</span>
+          <span class="currency-name">PKR (Rs)</span>
+        </div>
 
-  <input 
-    type="number" 
-    id="amount" 
-    placeholder="Total amount enter karo"
-  >
-  <button onclick="countCash()">Count</button>
+        <!-- Sound Toggle -->
+        <button id="soundToggle" class="icon-btn" title="Toggle Sound Feedback">
+          <svg id="soundOnIcon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+          </svg>
+          <svg id="soundOffIcon" class="hidden" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <line x1="23" y1="9" x2="17" y2="15"></line>
+            <line x1="17" y1="9" x2="23" y2="15"></line>
+          </svg>
+        </button>
+      </div>
+    </header>
 
-  <p id="result"></p>
+    <!-- Navigation Tabs -->
+    <nav class="mode-tabs">
+      <button class="tab-btn active" data-tab="tally-tab" id="btnTabTally">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="20" x2="18" y2="10"></line>
+          <line x1="12" y1="20" x2="12" y2="4"></line>
+          <line x1="6" y1="20" x2="6" y2="14"></line>
+        </svg>
+        <span>Denomination Counter</span>
+      </button>
 
-  <script src="app.js">
- 
-  </script>
+      <button class="tab-btn" data-tab="breakdown-tab" id="btnTabBreakdown">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"></path>
+          <path d="M12 6v2m0 8v2"></path>
+        </svg>
+        <span>Amount Breakdown</span>
+      </button>
 
+      <button class="tab-btn" data-tab="history-tab" id="btnTabHistory">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 8v4l3 3"></path>
+          <circle cx="12" cy="12" r="9"></circle>
+        </svg>
+        <span>History Logs (<span id="historyBadge">0</span>)</span>
+      </button>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="app-main">
+
+      <!-- ==================== TAB 1: DENOMINATION COUNTER ==================== -->
+      <section id="tally-tab" class="tab-pane active">
+        <div class="grid-layout">
+          
+          <!-- Left Column: Denomination Inputs -->
+          <div class="glass-card notes-card">
+            <div class="card-header">
+              <div class="card-title-group">
+                <span class="card-icon">💵</span>
+                <h2>Count Physical Cash</h2>
+              </div>
+              <div class="quick-header-actions">
+                <button class="text-btn" id="btnResetTally" title="Clear all counts">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                    <path d="M3 3v5h5"></path>
+                  </svg>
+                  Reset
+                </button>
+              </div>
+            </div>
+
+            <!-- Notes Table / List -->
+            <div class="denomination-list" id="denominationList">
+              <!-- Rendered dynamically by JS -->
+            </div>
+          </div>
+
+          <!-- Right Column: Live Summary & Actions -->
+          <div class="summary-column">
+            <!-- Grand Total Card -->
+            <div class="glass-card grand-total-card">
+              <span class="total-label">Total Cash Counted</span>
+              <div class="total-display">
+                <span class="currency-symbol">Rs.</span>
+                <span id="grandTotalAmount" class="total-num">0</span>
+              </div>
+
+              <!-- Amount in Words -->
+              <div class="amount-in-words-box">
+                <span class="words-title">In Words:</span>
+                <p id="amountInWords" class="words-text">Zero Rupees Only</p>
+              </div>
+
+              <!-- Stat Chips -->
+              <div class="stat-chips">
+                <div class="stat-chip">
+                  <span class="stat-chip-label">Total Notes</span>
+                  <span id="totalNotesCount" class="stat-chip-val">0 pcs</span>
+                </div>
+                <div class="stat-chip">
+                  <span class="stat-chip-label">High Value (≥500)</span>
+                  <span id="highValPercent" class="stat-chip-val">0%</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Cash Balancing / Difference Checker -->
+            <div class="glass-card balance-card">
+              <div class="balance-header">
+                <h3>Closing / Cash Difference</h3>
+                <span class="badge" id="balanceStatusBadge">Balanced</span>
+              </div>
+              <p class="section-desc">Enter expected register amount to verify short/excess:</p>
+              
+              <div class="input-with-symbol">
+                <span class="symbol-affix">Rs.</span>
+                <input type="number" id="expectedAmountInput" placeholder="Expected amount (e.g. 50,000)" min="0">
+              </div>
+
+              <div id="differenceResultBox" class="diff-result-box hidden">
+                <div class="diff-row">
+                  <span class="diff-title" id="diffTitle">Difference:</span>
+                  <span class="diff-val" id="diffValue">Rs. 0</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Action Tools -->
+            <div class="glass-card actions-card">
+              <h3>Receipt & Actions</h3>
+              <div class="action-buttons-grid">
+                <button class="action-btn primary" id="btnSaveRecord">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                    <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                    <polyline points="7 3 7 8 15 8"></polyline>
+                  </svg>
+                  Save to Log
+                </button>
+
+                <button class="action-btn secondary" id="btnCopySlip">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                  </svg>
+                  Copy Text
+                </button>
+
+                <button class="action-btn secondary" id="btnShareWhatsApp">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                    <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2zm5.79 14.07c-.24.68-1.39 1.3-1.92 1.38-.5.08-1.14.12-3.32-.78-2.61-1.08-4.29-3.73-4.42-3.9-.13-.18-1.06-1.41-1.06-2.69 0-1.28.67-1.91.91-2.17.24-.26.52-.33.7-.33.17 0 .35 0 .5.01.16.01.37-.06.58.44.22.52.74 1.81.81 1.94.06.14.11.3.02.48-.09.18-.13.29-.26.44-.13.15-.28.34-.4.46-.13.13-.27.28-.12.54.16.26.7 1.15 1.5 1.86 1.03.92 1.9 1.2 2.17 1.33.27.13.43.11.59-.07.16-.18.69-.81.87-1.08.18-.28.37-.23.62-.14.25.09 1.59.75 1.86.88.27.14.45.2.52.31.06.13.06.74-.18 1.42z"/>
+                  </svg>
+                  WhatsApp
+                </button>
+
+                <button class="action-btn secondary" id="btnPrintSlip">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                    <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                    <rect x="6" y="14" width="12" height="8"></rect>
+                  </svg>
+                  Print Slip
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== TAB 2: AMOUNT BREAKDOWN ==================== -->
+      <section id="breakdown-tab" class="tab-pane">
+        <div class="breakdown-container glass-card">
+          <div class="breakdown-header">
+            <div>
+              <h2>Cash Breakdown Calculator</h2>
+              <p class="subtitle">Enter target amount to calculate exact note count needed for dispensing / withdrawal</p>
+            </div>
+          </div>
+
+          <div class="breakdown-form">
+            <div class="breakdown-input-wrapper">
+              <label for="breakdownInput">Enter Total Amount</label>
+              <div class="input-with-symbol big-input">
+                <span class="symbol-affix">Rs.</span>
+                <input 
+                  type="number" 
+                  id="breakdownInput" 
+                  placeholder="e.g. 78500" 
+                  min="0"
+                  step="1"
+                >
+                <button id="btnComputeBreakdown" class="compute-btn">Calculate Breakdown</button>
+              </div>
+            </div>
+
+            <!-- Quick Presets -->
+            <div class="quick-presets">
+              <span class="preset-label">Quick Amounts:</span>
+              <button class="preset-pill" onclick="setBreakdownAmount(5000)">5,000</button>
+              <button class="preset-pill" onclick="setBreakdownAmount(10000)">10,000</button>
+              <button class="preset-pill" onclick="setBreakdownAmount(25000)">25,000</button>
+              <button class="preset-pill" onclick="setBreakdownAmount(50000)">50,000</button>
+              <button class="preset-pill" onclick="setBreakdownAmount(100000)">100,000</button>
+            </div>
+          </div>
+
+          <!-- Breakdown Results Display -->
+          <div id="breakdownResultsSection" class="breakdown-results-wrapper hidden">
+            <div class="breakdown-summary-banner">
+              <div class="banner-item">
+                <span class="banner-sub">Target Amount</span>
+                <h3 id="targetAmountDisplay">Rs. 0</h3>
+              </div>
+              <div class="banner-item">
+                <span class="banner-sub">Total Notes Required</span>
+                <h3 id="targetNotesCountDisplay">0 Notes</h3>
+              </div>
+              <div class="banner-item">
+                <span class="banner-sub">Remainder / Coins</span>
+                <h3 id="targetRemainderDisplay">Rs. 0</h3>
+              </div>
+            </div>
+
+            <div class="breakdown-cards-grid" id="breakdownCardsGrid">
+              <!-- Rendered by JS -->
+            </div>
+
+            <div class="breakdown-action-row">
+              <button class="action-btn secondary" id="btnApplyToCounter">
+                Transfer to Denomination Counter ➡️
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== TAB 3: HISTORY LOGS ==================== -->
+      <section id="history-tab" class="tab-pane">
+        <div class="glass-card history-container">
+          <div class="history-header">
+            <div>
+              <h2>Saved Cash Count Records</h2>
+              <p class="subtitle">History of previous cash balances and closing counts</p>
+            </div>
+            <div class="history-tools">
+              <button class="action-btn danger-sm" id="btnClearHistory">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="3 6 5 6 21 6"></polyline>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+                Clear All
+              </button>
+            </div>
+          </div>
+
+          <div id="historyList" class="history-list">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <p>Smart Cash Counter &bull; Designed for Cashiers, Retailers & Business Accounts</p>
+    </footer>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast" class="toast hidden"></div>
+
+  <!-- Printable Receipt Modal / Section (Hidden on screen, active when printed) -->
+  <div id="printableSlip" class="printable-slip">
+    <div class="slip-header">
+      <h2>CASH COUNT SLIP</h2>
+      <p id="slipTimestamp">Date: 2026-09-24</p>
+    </div>
+    <hr class="slip-divider">
+    <div class="slip-table" id="slipTableContent">
+      <!-- Injected by JS -->
+    </div>
+    <hr class="slip-divider">
+    <div class="slip-totals">
+      <div class="slip-row bold">
+        <span>TOTAL AMOUNT:</span>
+        <span id="slipTotalAmount">Rs. 0</span>
+      </div>
+      <div class="slip-row">
+        <span>Total Notes:</span>
+        <span id="slipTotalNotes">0</span>
+      </div>
+      <div class="slip-words">
+        <span>Words:</span>
+        <p id="slipWords"></p>
+      </div>
+    </div>
+    <div class="slip-footer">
+      <p>Cashier Signature: __________________</p>
+      <p>Verified By: ______________________</p>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
 </body>
 </html>
