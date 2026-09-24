@@ -1034,6 +1034,20 @@ body {
   transform: translateY(-1px);
 }
 
+.whatsapp-slip-btn {
+  grid-column: span 2;
+  background: linear-gradient(135deg, #25D366, #128C7E);
+  color: #ffffff;
+  font-weight: 800;
+  box-shadow: 0 4px 15px rgba(37, 211, 102, 0.35);
+}
+
+.whatsapp-slip-btn:hover {
+  background: linear-gradient(135deg, #1ebe5d, #075E54);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(37, 211, 102, 0.45);
+}
+
 .secondary-btn {
   background: var(--bg-input);
   border-color: var(--border-subtle);

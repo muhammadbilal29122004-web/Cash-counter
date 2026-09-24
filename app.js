@@ -943,9 +943,270 @@ function getSlipTextSummary() {
   lines.push('──────────────────────────────');
   lines.push('✨ Powered by Bilal Cash Desk™ Pro');
 
-  return { text: lines.join('\n'), grandTotal, totalNotes };
+// ==================== VISUAL SLIP & RECEIPT GENERATOR ====================
+function generateReceiptCanvas() {
+  const curr = CURRENCIES[currentCurrency];
+  let grandTotal = 0, totalNotes = 0;
+  const noteRows = [];
+
+  curr.denominations.forEach(denom => {
+    const count = countState[denom] || 0;
+    if (count > 0) {
+      const sub = count * denom;
+      grandTotal += sub;
+      totalNotes += count;
+      noteRows.push({ denom, count, sub });
+    }
+  });
+
+  if (grandTotal === 0) return null;
+
+  const exp = parseFloat(document.getElementById('expectedCashInput')?.value) || 0;
+  const diff = grandTotal - exp;
+
+  const width = 640;
+  const rowHeight = 36;
+  const tableHeight = (noteRows.length * rowHeight) + 40;
+  const height = 500 + tableHeight + (exp > 0 ? 60 : 0);
+
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext('2d');
+
+  // Background
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, width, height);
+
+  // Outer Border
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = '#059669';
+  ctx.strokeRect(10, 10, width - 20, height - 20);
+
+  // Top Header Banner
+  const headerGrad = ctx.createLinearGradient(0, 10, 0, 90);
+  headerGrad.addColorStop(0, '#064e3b');
+  headerGrad.addColorStop(1, '#059669');
+  ctx.fillStyle = headerGrad;
+  ctx.fillRect(10, 10, width - 20, 80);
+
+  // Brand Name
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 22px Plus Jakarta Sans, Arial';
+  ctx.textAlign = 'center';
+  ctx.fillText('BILAL CASH DESK™ PRO', width / 2, 45);
+
+  ctx.fillStyle = '#fef08a';
+  ctx.font = 'bold 12px Plus Jakarta Sans, Arial';
+  ctx.fillText('OFFICIAL CASH COUNT & RECONCILIATION SLIP', width / 2, 68);
+
+  // Meta Info Box
+  let y = 118;
+  ctx.fillStyle = '#334155';
+  ctx.font = '13px Plus Jakarta Sans, Arial';
+  ctx.textAlign = 'left';
+  ctx.fillText(`📅 Date & Time: ${new Date().toLocaleString()}`, 30, y);
+  ctx.fillText(`👤 Cashier: Muhammad Bilal (Desk #01)`, width - 270, y);
+  
+  y += 24;
+  ctx.fillText(`💱 Currency: ${currentCurrency} (${curr.symbol})`, 30, y);
+  ctx.fillText(`🖥️ Terminal: POS-01 (Main Desk)`, width - 270, y);
+
+  // Table Header Strip
+  y += 24;
+  ctx.fillStyle = '#0f172a';
+  ctx.fillRect(25, y, width - 50, 32);
+
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 12px JetBrains Mono, monospace';
+  ctx.fillText('DENOMINATION', 40, y + 21);
+  ctx.textAlign = 'center';
+  ctx.fillText('QUANTITY / PCS', width / 2, y + 21);
+  ctx.textAlign = 'right';
+  ctx.fillText('SUBTOTAL (' + curr.symbol + ')', width - 40, y + 21);
+
+  // Table Rows
+  y += 34;
+  noteRows.forEach((row, i) => {
+    ctx.fillStyle = i % 2 === 0 ? '#f8fafc' : '#ffffff';
+    ctx.fillRect(25, y, width - 50, rowHeight);
+
+    ctx.fillStyle = '#1e293b';
+    ctx.font = 'bold 14px JetBrains Mono, monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText(`${curr.symbol} ${row.denom}`, 40, y + 23);
+
+    ctx.fillStyle = '#475569';
+    ctx.textAlign = 'center';
+    ctx.fillText(`× ${row.count} pcs`, width / 2, y + 23);
+
+    ctx.fillStyle = '#0f172a';
+    ctx.font = 'bold 14px JetBrains Mono, monospace';
+    ctx.textAlign = 'right';
+    ctx.fillText(`${curr.symbol} ${formatNumber(row.sub)}`, width - 40, y + 23);
+
+    y += rowHeight;
+  });
+
+  // Dashed Line
+  y += 10;
+  ctx.strokeStyle = '#cbd5e1';
+  ctx.lineWidth = 1.5;
+  ctx.setLineDash([5, 4]);
+  ctx.beginPath();
+  ctx.moveTo(25, y);
+  ctx.lineTo(width - 25, y);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Grand Total Green Card
+  y += 16;
+  ctx.fillStyle = '#ecfdf5';
+  ctx.strokeStyle = '#10b981';
+  ctx.lineWidth = 1.5;
+  ctx.fillRect(25, y, width - 50, 64);
+  ctx.strokeRect(25, y, width - 50, 64);
+
+  ctx.fillStyle = '#047857';
+  ctx.font = 'bold 12px Plus Jakarta Sans, Arial';
+  ctx.textAlign = 'left';
+  ctx.fillText('TOTAL CASH COUNTED:', 42, y + 24);
+  ctx.fillText(`Total Banknotes: ${totalNotes} pcs (${(totalNotes / 100).toFixed(1)} bundles)`, 42, y + 46);
+
+  ctx.fillStyle = '#065f46';
+  ctx.font = '800 24px JetBrains Mono, monospace';
+  ctx.textAlign = 'right';
+  ctx.fillText(`${curr.symbol} ${formatNumber(grandTotal)}`, width - 42, y + 40);
+
+  // Amount in Words
+  y += 80;
+  ctx.fillStyle = '#f1f5f9';
+  ctx.fillRect(25, y, width - 50, 42);
+  ctx.fillStyle = '#64748b';
+  ctx.font = 'bold 10px Plus Jakarta Sans, Arial';
+  ctx.textAlign = 'left';
+  ctx.fillText('AMOUNT IN WORDS:', 35, y + 16);
+  ctx.fillStyle = '#0f172a';
+  ctx.font = 'italic 12px Plus Jakarta Sans, Arial';
+  ctx.fillText(numberToWords(grandTotal, curr.wordSystem), 35, y + 33);
+
+  // Expected & Variance (If entered)
+  if (exp > 0) {
+    y += 50;
+    ctx.fillStyle = '#fafafa';
+    ctx.fillRect(25, y, width - 50, 36);
+    ctx.fillStyle = '#64748b';
+    ctx.font = '12px Plus Jakarta Sans, Arial';
+    ctx.fillText(`Expected POS Amount: ${curr.symbol} ${formatNumber(exp)}`, 35, y + 23);
+    
+    ctx.textAlign = 'right';
+    if (diff === 0) {
+      ctx.fillStyle = '#16a34a';
+      ctx.font = 'bold 12px Plus Jakarta Sans, Arial';
+      ctx.fillText('Status: Balanced (Rs. 0)', width - 35, y + 23);
+    } else if (diff < 0) {
+      ctx.fillStyle = '#dc2626';
+      ctx.font = 'bold 12px Plus Jakarta Sans, Arial';
+      ctx.fillText(`Variance: Short - ${curr.symbol} ${formatNumber(Math.abs(diff))}`, width - 35, y + 23);
+    } else {
+      ctx.fillStyle = '#d97706';
+      ctx.font = 'bold 12px Plus Jakarta Sans, Arial';
+      ctx.fillText(`Variance: Excess + ${curr.symbol} ${formatNumber(diff)}`, width - 35, y + 23);
+    }
+  }
+
+  // Signatures Section
+  y += 56;
+  ctx.strokeStyle = '#94a3b8';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(50, y);
+  ctx.lineTo(200, y);
+  ctx.moveTo(width - 200, y);
+  ctx.lineTo(width - 50, y);
+  ctx.stroke();
+
+  ctx.fillStyle = '#475569';
+  ctx.font = '11px Plus Jakarta Sans, Arial';
+  ctx.textAlign = 'center';
+  ctx.fillText('Cashier (Muhammad Bilal)', 125, y + 16);
+  ctx.fillText('Manager / Auditor Signature', width - 125, y + 16);
+
+  // Footer Watermark
+  y += 34;
+  ctx.fillStyle = '#94a3b8';
+  ctx.font = '10px Plus Jakarta Sans, Arial';
+  ctx.fillText('✨ Generated via Bilal Cash Desk™ Pro • 100% Verified Cash Count Slip', width / 2, y);
+
+  return canvas;
 }
 
+// WhatsApp Slip Share (Image / PDF Slip File)
+async function shareSlipToWhatsApp() {
+  const canvas = generateReceiptCanvas();
+  if (!canvas) {
+    showToast('Count some notes first!');
+    return;
+  }
+
+  canvas.toBlob(async (blob) => {
+    const file = new File([blob], `Bilal_Cash_Slip_${Date.now()}.png`, { type: 'image/png' });
+
+    // 1. Mobile & Modern Web Share API (Directly sends the Slip Image File to WhatsApp!)
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({
+          files: [file],
+          title: 'Cash Count Slip',
+          text: 'Cash Count Slip generated via Bilal Cash Desk™ Pro'
+        });
+        showToast('✓ Slip shared to WhatsApp successfully!');
+        return;
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          console.error(err);
+        }
+      }
+    }
+
+    // 2. Desktop Web WhatsApp Fallback:
+    // Copy image directly to Clipboard so you can press Ctrl+V in WhatsApp Web to send image!
+    try {
+      await navigator.clipboard.write([
+        new ClipboardItem({ 'image/png': blob })
+      ]);
+      showToast('✓ Slip image copied! WhatsApp mein Ctrl+V se paste karein.');
+    } catch (e) {
+      showToast('Slip image ready!');
+    }
+
+    // Download the PNG Slip
+    downloadSlipImage();
+
+    // Open WhatsApp Web with summary
+    const { text } = getSlipTextSummary();
+    const encoded = encodeURIComponent(text);
+    window.open(`https://api.whatsapp.com/send?text=${encoded}`, '_blank');
+  }, 'image/png');
+}
+
+// Download Slip Image / Document
+function downloadSlipImage() {
+  const canvas = generateReceiptCanvas();
+  if (!canvas) {
+    showToast('Count some notes first!');
+    return;
+  }
+  const a = document.createElement('a');
+  a.href = canvas.toDataURL('image/png');
+  a.download = `Bilal_Cash_Slip_${new Date().toISOString().split('T')[0]}.png`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  showToast('✓ Cash Slip downloaded!');
+}
+
+// Copy Summary Text
 function copyReportSummary() {
   const { text, grandTotal } = getSlipTextSummary();
   if (grandTotal === 0) {
@@ -957,15 +1218,6 @@ function copyReportSummary() {
   }).catch(() => {
     showToast('Could not copy to clipboard.');
   });
-}
-
-function shareViaWhatsApp() {
-  const { text, grandTotal } = getSlipTextSummary();
-  if (grandTotal === 0) {
-    showToast('Count some notes first!');
-    return;
-  }
-  window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
 }
 
 function printThermalReceipt() {
@@ -1017,7 +1269,7 @@ function showToast(msg) {
   toast.innerHTML = `<span>⚡</span> <span>${msg}</span>`;
   toast.classList.remove('hidden');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => { toast.classList.add('hidden'); }, 2600);
+  toastTimer = setTimeout(() => { toast.classList.add('hidden'); }, 3000);
 }
 
 // Master Tab Navigation
@@ -1091,6 +1343,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('btnSaveShiftLog')?.addEventListener('click', saveCurrentShiftLog);
   document.getElementById('btnCopyReport')?.addEventListener('click', copyReportSummary);
-  document.getElementById('btnWhatsAppShare')?.addEventListener('click', shareViaWhatsApp);
+  document.getElementById('btnWhatsAppShare')?.addEventListener('click', shareSlipToWhatsApp);
+  document.getElementById('btnDownloadSlipImg')?.addEventListener('click', downloadSlipImage);
   document.getElementById('btnPrintReceipt')?.addEventListener('click', printThermalReceipt);
 });
